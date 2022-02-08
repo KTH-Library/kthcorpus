@@ -19,6 +19,12 @@
     <loc>/news/index.html</loc>
   </url>
   <url>
+    <loc>/reference/check_mapping.html</loc>
+  </url>
+  <url>
+    <loc>/reference/check_remap_colnames.html</loc>
+  </url>
+  <url>
     <loc>/reference/classify_swepub.html</loc>
   </url>
   <url>
@@ -73,6 +79,9 @@
     <loc>/reference/kthcorpus.html</loc>
   </url>
   <url>
+    <loc>/reference/linkify.html</loc>
+  </url>
+  <url>
     <loc>/reference/minio_get.html</loc>
   </url>
   <url>
@@ -98,5 +107,8 @@
   </url>
   <url>
     <loc>/reference/swepub_checks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/tidy_html.html</loc>
   </url>
 </urlset>
