@@ -40,7 +40,13 @@
     <loc>/reference/classify_umu_ub.html</loc>
   </url>
   <url>
+    <loc>/reference/diva_download.html</loc>
+  </url>
+  <url>
     <loc>/reference/diva_meta.html</loc>
+  </url>
+  <url>
+    <loc>/reference/diva_organisations.html</loc>
   </url>
   <url>
     <loc>/reference/diva_refresh.html</loc>
@@ -70,6 +76,9 @@
     <loc>/reference/kth_diva_authors.html</loc>
   </url>
   <url>
+    <loc>/reference/kth_diva_authors_deprecated.html</loc>
+  </url>
+  <url>
     <loc>/reference/kth_diva_checks.html</loc>
   </url>
   <url>
@@ -80,6 +89,9 @@
   </url>
   <url>
     <loc>/reference/kth_diva_pubs.html</loc>
+  </url>
+  <url>
+    <loc>/reference/kth_diva_pubs_deprecated.html</loc>
   </url>
   <url>
     <loc>/reference/kth_issues_pubauth.html</loc>
