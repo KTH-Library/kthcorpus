@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
       </span>
     </div>
 
@@ -107,18 +107,15 @@
 </h1>
 <p>Press “Ctrl-Shift-L” to load function, which can then be run, for example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">check_invalid_DOI</span><span class="op">(</span><span class="op">)</span>
-<span class="co"># A tibble: 1 x 2</span>
-<span class="co">#  DOI                         PID</span>
-<span class="co">#  &lt;chr&gt;                     &lt;dbl&gt;</span>
-<span class="co">#1 0.1109/ICC.2019.8761470 1498747</span></code></pre></div>
-<p>The cache with downloaded data for publications and author data can be cleared:</p>
+<code class="sourceCode R"><span class="va">mia</span> <span class="op">&lt;-</span> 
+  <span class="fu">check_missing_kthid</span><span class="op">(</span><span class="op">)</span> 
+
+<span class="co"># display results as interactive HTML table</span>
+<span class="va">mia</span> <span class="op">%&gt;%</span> 
+  <span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span>escape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<p>The cache with downloaded data for publications and author data can be refreshed:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu">rappdirs</span><span class="fu">::</span><span class="fu"><a href="https://rappdirs.r-lib.org/reference/app_dir.html" class="external-link">app_dir</a></span><span class="op">(</span><span class="st">"kthcorpus"</span><span class="op">)</span><span class="op">$</span><span class="fu">config</span><span class="op">(</span><span class="op">)</span>, 
-    <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"kth_diva_pubs.rds"</span>, <span class="st">"kth_diva_authors.rds"</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="reference/diva_refresh.html">diva_refresh</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <div class="section level2">
 <h2 id="adding-checks">Adding checks<a class="anchor" aria-label="anchor" href="#adding-checks"></a>
 </h2>
