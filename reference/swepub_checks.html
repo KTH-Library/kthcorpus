@@ -20,7 +20,7 @@ This function calls an API at SwePub for KTH data in a specific time period"><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
       </span>
     </div>
 
@@ -58,17 +58,21 @@ This function calls an API at SwePub for KTH data in a specific time period</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">swepub_checks</span><span class="op">(</span>org <span class="op">=</span> <span class="st">"kth"</span>, year_beg <span class="op">=</span> <span class="fl">1900L</span>, year_end <span class="op">=</span> <span class="fl">2022</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">swepub_checks</span><span class="op">(</span>
+  config <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span>,
+  year_beg <span class="op">=</span> <span class="fl">1900L</span>,
+  year_end <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/year.html" class="external-link">year</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>org</dt>
-<dd><p>the organization, default: "kth"</p></dd>
+    <dl><dt>config</dt>
+<dd><p>the configuration to use, by default diva_config (w org "kth")</p></dd>
 <dt>year_beg</dt>
 <dd><p>the beginning year, default 1900</p></dd>
 <dt>year_end</dt>
-<dd><p>the ending year, default 2020</p></dd>
+<dd><p>the ending year, default is the current year</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>

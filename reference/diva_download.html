@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
       </span>
     </div>
 
@@ -55,10 +55,11 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">diva_download</span><span class="op">(</span>
   set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pub"</span>, <span class="st">"aut"</span><span class="op">)</span>,
-  org_id <span class="op">=</span> <span class="st">"177"</span>,
-  year_beg <span class="op">=</span> <span class="fl">2013</span>,
-  year_end <span class="op">=</span> <span class="fl">2022</span>,
-  sync <span class="op">=</span> <span class="cn">FALSE</span>
+  org_id <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">id</span>,
+  year_beg <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">ybeg</span>,
+  year_end <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">yend</span>,
+  sync <span class="op">=</span> <span class="cn">FALSE</span>,
+  portal <span class="op">=</span> <span class="va">diva_config</span><span class="op">$</span><span class="va">portal</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -74,6 +75,8 @@
 <dd><p>last year in a range of years, default 2022</p></dd>
 <dt>sync</dt>
 <dd><p>logical to indicate if sync should be made to s3 (default: FALSE)</p></dd>
+<dt>portal</dt>
+<dd><p>base url for links to portal, by default diva_config()$portal</p></dd>
 </dl></div>
 
   </div>

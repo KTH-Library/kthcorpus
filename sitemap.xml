@@ -40,6 +40,15 @@
     <loc>/reference/classify_umu_ub.html</loc>
   </url>
   <url>
+    <loc>/reference/diva_authors.html</loc>
+  </url>
+  <url>
+    <loc>/reference/diva_checks.html</loc>
+  </url>
+  <url>
+    <loc>/reference/diva_config.html</loc>
+  </url>
+  <url>
     <loc>/reference/diva_download.html</loc>
   </url>
   <url>
@@ -47,6 +56,9 @@
   </url>
   <url>
     <loc>/reference/diva_organisations.html</loc>
+  </url>
+  <url>
+    <loc>/reference/diva_pubs.html</loc>
   </url>
   <url>
     <loc>/reference/diva_refresh.html</loc>
