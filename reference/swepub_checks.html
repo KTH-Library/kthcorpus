@@ -20,7 +20,7 @@ This function calls an API at SwePub for KTH data in a specific time period"><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -58,34 +58,41 @@ This function calls an API at SwePub for KTH data in a specific time period</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">swepub_checks</span><span class="op">(</span>
-  config <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span>,
-  year_beg <span class="op">=</span> <span class="fl">1900L</span>,
-  year_end <span class="op">=</span> <span class="fu">lubridate</span><span class="fu">::</span><span class="fu"><a href="https://lubridate.tidyverse.org/reference/year.html" class="external-link">year</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">swepub_checks</span><span class="op">(</span></span>
+<span>  config <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  year_beg <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">yend</span>,</span>
+<span>  year_end <span class="op">=</span> <span class="fu"><a href="diva_config.html">diva_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">yend</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>config</dt>
 <dd><p>the configuration to use, by default diva_config (w org "kth")</p></dd>
+
+
 <dt>year_beg</dt>
-<dd><p>the beginning year, default 1900</p></dd>
+<dd><p>the beginning year, default is the yend value from diva_config</p></dd>
+
+
 <dt>year_end</dt>
-<dd><p>the ending year, default is the current year</p></dd>
+<dd><p>the ending year, default is the yend value from diva_config</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>tibble with results</p>
+    
+
+<p>tibble with results</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in"> <span class="fu">swepub_checks</span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"> <span class="op">}</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="fu">swepub_checks</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="op">}</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -100,7 +107,7 @@ This function calls an API at SwePub for KTH data in a specific time period</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

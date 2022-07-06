@@ -37,7 +37,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -79,26 +79,26 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"KTH-Library/kthcorpus"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"KTH-Library/kthcorpus"</span>, dependencies <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <p>This is a basic example which shows you how to use some of these tools:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KTH-Library/kthcorpus" class="external-link">kthcorpus</a></span><span class="op">)</span>
-
-<span class="co"># download and cache KTH DiVA data</span>
-<span class="va">pubs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_pubs.html">kth_diva_pubs</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">authors</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_authors.html">kth_diva_authors</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">aliases</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_aliases.html">kth_diva_aliases</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_issues.html">kth_diva_issues</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># run some checks</span>
-<span class="va">checks</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_checks.html">kth_diva_checks</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="co"># see results</span>
-<span class="va">checks</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/KTH-Library/kthcorpus" class="external-link">kthcorpus</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># download and cache KTH DiVA data</span></span>
+<span><span class="va">pubs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_pubs.html">kth_diva_pubs</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">authors</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_authors.html">kth_diva_authors</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">aliases</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_aliases.html">kth_diva_aliases</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">issues</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_issues.html">kth_diva_issues</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># run some checks</span></span>
+<span><span class="va">checks</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kth_diva_checks.html">kth_diva_checks</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># see results</span></span>
+<span><span class="va">checks</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level1">
@@ -106,15 +106,15 @@
 </h1>
 <p>Press “Ctrl-Shift-L” to load function, which can then be run, for example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">mia</span> <span class="op">&lt;-</span> 
-  <span class="fu">check_missing_kthid</span><span class="op">(</span><span class="op">)</span> 
-
-<span class="co"># display results as interactive HTML table</span>
-<span class="va">mia</span> <span class="op">%&gt;%</span> 
-  <span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span>escape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">mia</span> <span class="op">&lt;-</span> </span>
+<span>  <span class="fu">check_missing_kthid</span><span class="op">(</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># display results as interactive HTML table</span></span>
+<span><span class="va">mia</span> <span class="op">%&gt;%</span> </span>
+<span>  <span class="fu">DT</span><span class="fu">::</span><span class="fu">datatable</span><span class="op">(</span>escape <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>The cache with downloaded data for publications and author data can be refreshed:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="reference/diva_refresh.html">diva_refresh</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/diva_refresh.html">diva_refresh</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="adding-checks">Adding checks<a class="anchor" aria-label="anchor" href="#adding-checks"></a>
 </h2>
@@ -181,7 +181,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer>

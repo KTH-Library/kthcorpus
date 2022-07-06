@@ -18,7 +18,7 @@ covering KTH publications between 2013 and 2022."><!-- mathjax --><script src="h
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -55,28 +55,37 @@ covering KTH publications between 2013 and 2022.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">kth_diva_pubs_deprecated</span><span class="op">(</span>
-  orgid <span class="op">=</span> <span class="st">"177"</span>,
-  year_beg <span class="op">=</span> <span class="st">"2013"</span>,
-  year_end <span class="op">=</span> <span class="st">"2022"</span>,
-  use_cache <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">kth_diva_pubs_deprecated</span><span class="op">(</span></span>
+<span>  orgid <span class="op">=</span> <span class="st">"177"</span>,</span>
+<span>  year_beg <span class="op">=</span> <span class="st">"2013"</span>,</span>
+<span>  year_end <span class="op">=</span> <span class="st">"2022"</span>,</span>
+<span>  use_cache <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>orgid</dt>
 <dd><p>the DiVA organisation id, by default "177" for KTH</p></dd>
+
+
 <dt>year_beg</dt>
 <dd><p>the beginning of the period, by default "2013"</p></dd>
+
+
 <dt>year_end</dt>
 <dd><p>the end of the period, by default "2022"</p></dd>
+
+
 <dt>use_cache</dt>
 <dd><p>logical flag to indicate if cached data should be used, default: TRUE</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>data frame with results</p>
+    
+
+<p>data frame with results</p>
     </div>
 
   </div>
@@ -91,7 +100,7 @@ covering KTH publications between 2013 and 2022.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

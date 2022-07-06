@@ -20,7 +20,7 @@ A curated version of DiVA data with S2_publication_ID and S2_authors"><!-- mathj
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.3</span>
       </span>
     </div>
 
@@ -58,25 +58,28 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>jq</dt>
 <dd><p>query for <a href="https://docs.ropensci.org/jqr/" class="external-link">filtering the data</a></p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>tibble</p>
+    
+
+<p>tibble</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"> <span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="st">'select(.PID == "13125" or .PID == "461429")'</span><span class="op">)</span></span>
-<span class="r-in"> <span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="st">'select(.S2_publication_ID == "f00ec4c737ca6722a4629eb5bcc25787c2173df5")'</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> <span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="st">'select(.PID == "13125" or .PID == "461429")'</span><span class="op">)</span></span></span>
+<span class="r-in"><span> <span class="fu">kth_diva_curated</span><span class="op">(</span>jq <span class="op">=</span> <span class="st">'select(.S2_publication_ID == "f00ec4c737ca6722a4629eb5bcc25787c2173df5")'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -91,7 +94,7 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
