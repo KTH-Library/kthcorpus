@@ -455,6 +455,10 @@ Godkända tecken är gemena bokstäverna a-z samt siffrorna 0-9.
 
 KuraTHor fångar upp poster som har ogiltiga ISBN utifrån antal tecken samt värdet på kontrollsiffran. Ett ISBN-nummer ska bestå av 10 eller 13 siffror (0-9), som sista tecken är även bokstaven X tillåten och representerar då siffran tio. Den sista siffran i strängen är en kontrollsiffra. ISBN presenteras ofta med bindestreck mellan sifferradens olika delar. Kontrollen accepterar ISBN både med och utan bindestreck.
 
+*Felaktigt använt ISBN* 
+
+KuraTHor fångar upp poster av publikationstypen bokkapitel, konferensbidrag eller artikel som har ett ISBN inlagt i fältet för ISBN. Enskilda bokkapitel, konferensbidrag och artiklar ska inte ha något värde i fältet för ISBN, istället anges ISBN på den publikation (bok, konferenshandling) som postens publikation är en del av i anmärkningsfältet.  
+
 __Saknat mm__
 
 Kontroller samlade under rubriken [Saknat mm](#saknat-mm) identifierar bland annat poster med ofullständiga uppgifter och poster med ogiltig publiceringsstatus.
