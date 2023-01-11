@@ -145,10 +145,19 @@
     <loc>/reference/research_areas.html</loc>
   </url>
   <url>
+    <loc>/reference/scopus_abstract_extended.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_browse.html</loc>
+  </url>
+  <url>
     <loc>/reference/scopus_config.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_ratelimit_quota.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_req_abstract.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_search_aut_kth.html</loc>
