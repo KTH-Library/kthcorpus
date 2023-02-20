@@ -124,6 +124,9 @@
     <loc>/reference/kthcorpus.html</loc>
   </url>
   <url>
+    <loc>/reference/kthid_orcid.html</loc>
+  </url>
+  <url>
     <loc>/reference/linkify.html</loc>
   </url>
   <url>
@@ -145,6 +148,12 @@
     <loc>/reference/parse_diva_names.html</loc>
   </url>
   <url>
+    <loc>/reference/read_diva_csvall2.html</loc>
+  </url>
+  <url>
+    <loc>/reference/read_diva_mods.html</loc>
+  </url>
+  <url>
     <loc>/reference/research_areas.html</loc>
   </url>
   <url>
@@ -154,16 +163,31 @@
     <loc>/reference/scopus_browse.html</loc>
   </url>
   <url>
+    <loc>/reference/scopus_classify.html</loc>
+  </url>
+  <url>
     <loc>/reference/scopus_config.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_filter_kth_authors.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_from_minio.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_mods.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_mods_crawl.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_mods_params.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_ratelimit_quota.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_req_abstract.html</loc>
-  </url>
-  <url>
-    <loc>/reference/scopus_search_aut_kth.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_search_pubs_kth.html</loc>
@@ -182,5 +206,8 @@
   </url>
   <url>
     <loc>/reference/unit_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/write_mods_zip.html</loc>
   </url>
 </urlset>

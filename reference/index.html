@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">kthcorpus</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.3.0</span>
       </span>
     </div>
 
@@ -188,6 +188,10 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p></td>
         </td>
         <td><p>KTH APIs</p></td>
       </tr><tr><td>
+          <p><code><a href="kthid_orcid.html">kthid_orcid()</a></code> </p>
+        </td>
+        <td><p>Read ORCiD kthid pairs from object storage</p></td>
+      </tr><tr><td>
           <p><code><a href="linkify.html">linkify()</a></code> </p>
         </td>
         <td><p>Convert a string with a URL to a link</p></td>
@@ -216,6 +220,14 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p></td>
         </td>
         <td><p>Parse all DiVA namestrings in DiVA publications</p></td>
       </tr><tr><td>
+          <p><code><a href="read_diva_csvall2.html">read_diva_csvall2()</a></code> </p>
+        </td>
+        <td><p>Read rectangular data from DiVA given a specific identifier</p></td>
+      </tr><tr><td>
+          <p><code><a href="read_diva_mods.html">read_diva_mods()</a></code> </p>
+        </td>
+        <td><p>Read a MODS file from DiVA given a DiVA publication identifier</p></td>
+      </tr><tr><td>
           <p><code><a href="research_areas.html">research_areas</a></code> </p>
         </td>
         <td><p>Research Subject Areas from https://uka.se</p></td>
@@ -228,9 +240,33 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p></td>
         </td>
         <td><p>Browse a Scopus electronic identifier</p></td>
       </tr><tr><td>
+          <p><code><a href="scopus_classify.html">scopus_classify()</a></code> </p>
+        </td>
+        <td><p>Classify subject categories given a Scopus identifier</p></td>
+      </tr><tr><td>
           <p><code><a href="scopus_config.html">scopus_config()</a></code> </p>
         </td>
         <td><p>Configuration for credentials when using Scopus API</p></td>
+      </tr><tr><td>
+          <p><code><a href="scopus_filter_kth_authors.html">scopus_filter_kth_authors()</a></code> </p>
+        </td>
+        <td><p>Authors affiliated with KTH for a default search request</p></td>
+      </tr><tr><td>
+          <p><code><a href="scopus_from_minio.html">scopus_from_minio()</a></code> </p>
+        </td>
+        <td><p>Read scopus data from object storage</p></td>
+      </tr><tr><td>
+          <p><code><a href="scopus_mods.html">scopus_mods()</a></code> </p>
+        </td>
+        <td><p>Generate MODS from a Scopus identifier</p></td>
+      </tr><tr><td>
+          <p><code><a href="scopus_mods_crawl.html">scopus_mods_crawl()</a></code> </p>
+        </td>
+        <td><p>Generate MODS from several Scopus identifiers</p></td>
+      </tr><tr><td>
+          <p><code><a href="scopus_mods_params.html">scopus_mods_params()</a></code> </p>
+        </td>
+        <td><p>Creates MODS for a given Scopus identifier</p></td>
       </tr><tr><td>
           <p><code><a href="scopus_ratelimit_quota.html">scopus_ratelimit_quota()</a></code> </p>
         </td>
@@ -239,10 +275,6 @@ A curated version of DiVA data with S2_publication_ID and S2_authors</p></td>
           <p><code><a href="scopus_req_abstract.html">scopus_req_abstract()</a></code> </p>
         </td>
         <td><p>Fetch abstract given Scopus ID</p></td>
-      </tr><tr><td>
-          <p><code><a href="scopus_search_aut_kth.html">scopus_search_aut_kth()</a></code> </p>
-        </td>
-        <td><p>Authors affiliated with KTH for a default search request</p></td>
       </tr><tr><td>
           <p><code><a href="scopus_search_pubs_kth.html">scopus_search_pubs_kth()</a></code> </p>
         </td>
@@ -268,6 +300,10 @@ This function calls an API at SwePub for KTH data in a specific time period</p><
           <p><code><a href="unit_names.html">unit_names</a></code> </p>
         </td>
         <td><p>DiVA unit identifiers for KTH with Swedish and English translations</p></td>
+      </tr><tr><td>
+          <p><code><a href="write_mods_zip.html">write_mods_zip()</a></code> </p>
+        </td>
+        <td><p>Write a zipped MODS-file with results from a scopus mods crawl</p></td>
       </tr></tbody></table></div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
