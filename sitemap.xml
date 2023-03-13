@@ -76,6 +76,9 @@
     <loc>/reference/diva_refresh_trigger.html</loc>
   </url>
   <url>
+    <loc>/reference/funders_eu_search.html</loc>
+  </url>
+  <url>
     <loc>/reference/hr_ls.html</loc>
   </url>
   <url>
@@ -212,6 +215,12 @@
   </url>
   <url>
     <loc>/reference/unit_names.html</loc>
+  </url>
+  <url>
+    <loc>/reference/vat_parse.html</loc>
+  </url>
+  <url>
+    <loc>/reference/vat_resolve_vies.html</loc>
   </url>
   <url>
     <loc>/reference/write_mods_zip.html</loc>
