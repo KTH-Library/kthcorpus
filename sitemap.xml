@@ -223,6 +223,9 @@
     <loc>/reference/vat_resolve_vies.html</loc>
   </url>
   <url>
+    <loc>/reference/write_mods_chunked.html</loc>
+  </url>
+  <url>
     <loc>/reference/write_mods_zip.html</loc>
   </url>
 </urlset>
