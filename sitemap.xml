@@ -40,10 +40,22 @@
     <loc>/reference/classify_umu_ub.html</loc>
   </url>
   <url>
+    <loc>/reference/countries_iso3.html</loc>
+  </url>
+  <url>
     <loc>/reference/cr_funders.html</loc>
   </url>
   <url>
     <loc>/reference/cr_funders_resolve.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cr_publisher.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cr_work_assertions.html</loc>
+  </url>
+  <url>
+    <loc>/reference/cr_work_confinfo.html</loc>
   </url>
   <url>
     <loc>/reference/diva_authors.html</loc>
@@ -197,6 +209,9 @@
   </url>
   <url>
     <loc>/reference/scopus_req_abstract.html</loc>
+  </url>
+  <url>
+    <loc>/reference/scopus_search_id.html</loc>
   </url>
   <url>
     <loc>/reference/scopus_search_pubs_kth.html</loc>
