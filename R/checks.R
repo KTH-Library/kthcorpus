@@ -16,35 +16,35 @@ kth_diva_issues <- function(authors = kth_diva_authors()) {
   # orcids which relates to more than one kthid
   # these could be data quality issues?
   details <-
-    namez %>%
-    filter(!is.na(orcid) & !is.na(kthid)) %>%
-    group_by(orcid) %>%
-    mutate(n1 = n_distinct(name), n2 = n_distinct(kthid)) %>%
-    filter(n2 > 1) %>%
-    distinct(orcid, kthid, n2, name) %>%
-    ungroup() %>%
-    arrange(orcid, kthid, desc(n2), name) %>%
-    select(orcid, kthid, n = n2) %>%
-    inner_join(namez) %>%
-    distinct(orcid, kthid) %>%
+    namez |>
+    filter(!is.na(orcid) & !is.na(kthid)) |>
+    group_by(orcid) |>
+    mutate(n1 = n_distinct(name), n2 = n_distinct(kthid)) |>
+    filter(n2 > 1) |>
+    distinct(orcid, kthid, n2, name) |>
+    ungroup() |>
+    arrange(orcid, kthid, desc(n2), name) |>
+    select(orcid, kthid, n = n2) |>
+    inner_join(namez) |>
+    distinct(orcid, kthid) |>
     collect()
 
   overview <-
-    details %>%
-    group_by(orcid) %>%
-    count(kthid) %>%
-    arrange(orcid, desc(n)) %>%
+    details |>
+    group_by(orcid) |>
+    count(kthid) |>
+    arrange(orcid, desc(n)) |>
     collect()
 
   # publications for kthids that have several different orcids
   pubs <-
-    namez %>%
-    left_join(namez %>%
-                filter(!is.na(orcid) & !is.na(kthid)) %>%
-                distinct(orcid, kthid), by = "kthid") %>%
-    filter(orcid.x != orcid.y) %>%
-    select(kthid, orcid.x, orcid.y, everything()) %>%
-    arrange(desc(kthid)) %>%
+    namez |>
+    left_join(namez |>
+                filter(!is.na(orcid) & !is.na(kthid)) |>
+                distinct(orcid, kthid), by = "kthid") |>
+    filter(orcid.x != orcid.y) |>
+    select(kthid, orcid.x, orcid.y, everything()) |>
+    arrange(desc(kthid)) |>
     collect()
 
   list(overview = overview, details = details, pubs = pubs)
@@ -163,8 +163,9 @@ linkify <- function(href, text = shorten(href), title = href, target =
   p_ISI <- function(x) {
     # Web of Science, sökning på UT=WoS-id:
     # http://apps.webofknowledge.com/InboundService.do?product=WOS&action=retrieve&mode=FullRecord&UT=000722432000004
+    # New URL: https://www.webofscience.com/wos/woscc/full-record/WOS:001001819900001
     stringr::str_c(
-      "http://apps.webofknowledge.com/InboundService.do?product=WOS&action=retrieve&mode=FullRecord&UT=",
+      "https://www.webofscience.com/wos/woscc/full-record/WOS:",
       x
     )
   }
@@ -285,57 +286,57 @@ check_multiplettes_article_title <- function(pubs = kth_diva_pubs(), authors = k
   Year <- n_check <- LastUpdated <- lc_title <- NULL
 
   article_title_multiplettes <-
-    pubs %>%
-    filter(grepl("^Artikel", PublicationType)) %>%
-    mutate(lc_title = trimws(tolower(Title))) %>%
-    group_by(lc_title) %>%
-    count(lc_title) %>%
-    arrange(desc(n)) %>%
+    pubs |>
+    filter(grepl("^Artikel", PublicationType)) |>
+    mutate(lc_title = trimws(tolower(Title))) |>
+    group_by(lc_title) |>
+    count(lc_title) |>
+    arrange(desc(n)) |>
     filter(n > 1)
 
   atm <-
-    article_title_multiplettes %>%
+    article_title_multiplettes |>
     left_join(
-      pubs %>%
-        filter(grepl("^Artikel", PublicationType)) %>%
-        mutate(lc_title = trimws(tolower(Title))) %>%
+      pubs |>
+        filter(grepl("^Artikel", PublicationType)) |>
+        mutate(lc_title = trimws(tolower(Title))) |>
         select(Title, lc_title, PID)
-      , by = "lc_title") %>%
-    group_by(lc_title, n) %>%
-    summarize(pids = paste0(collapse = " ", PID)) %>%
-    arrange(desc(n)) %>%
+      , by = "lc_title") |>
+    group_by(lc_title, n) |>
+    summarize(pids = paste0(collapse = " ", PID)) |>
+    arrange(desc(n)) |>
     collect()
 
   # FIXME
 
   atm <-
-    atm %>% tidyr::separate_rows(pids) %>%
-    mutate(PID = as.double(pids)) %>%
+    atm |> tidyr::separate_rows(pids) |>
+    mutate(PID = as.double(pids)) |>
     inner_join(
-      pubs %>% mutate(lc_title = trimws(tolower(Title)))
+      pubs |> mutate(lc_title = trimws(tolower(Title)))
       , by = c("lc_title", "PID")
-    ) %>%
-    #mutate(year = lubridate::year(PublicationDate)) %>%
+    ) |>
+    #mutate(year = lubridate::year(PublicationDate)) |>
     select(Title, lc_title, n, PID, Year, LastUpdated)
 
   a <-
-    authors %>%
-    filter(PID %in% atm$PID) %>%
-    mutate(last_name = gsub("(.+?)(,.*)", "\\1", name)) %>%
-    group_by(PID) %>%
+    authors |>
+    filter(PID %in% atm$PID) |>
+    mutate(last_name = gsub("(.+?)(,.*)", "\\1", name)) |>
+    group_by(PID) |>
     summarise(initials = paste0(collapse = "", substr(last_name, 1, 1)))
 
-  atm %>%
-    inner_join(a, by = "PID") %>%
-    mutate(check_key = paste0(initials, "_", Year)) %>%
-    select(PID, Year, Title, lc_title, LastUpdated, check_key, n) %>%
-    mutate(PID = link_diva(PID, PID)) %>%
-    mutate(Title = link_titlesearch(Title, Title)) %>%
-    group_by(check_key) %>%
-    add_count(check_key, sort = TRUE, name = "n_check") %>%
-    arrange(desc(LastUpdated), desc(check_key), desc(n_check), desc(Title)) %>%
-    ungroup() %>%
-    collect() %>%
+  atm |>
+    inner_join(a, by = "PID") |>
+    mutate(check_key = paste0(initials, "_", Year)) |>
+    select(PID, Year, Title, lc_title, LastUpdated, check_key, n) |>
+    mutate(PID = link_diva(PID, PID)) |>
+    mutate(Title = link_titlesearch(Title, Title)) |>
+    group_by(check_key) |>
+    add_count(check_key, sort = TRUE, name = "n_check") |>
+    arrange(desc(LastUpdated), desc(check_key), desc(n_check), desc(Title)) |>
+    ungroup() |>
+    collect() |>
     select(PID, Year, Title, check_key, n, n_check, LastUpdated)
 
 }
@@ -346,6 +347,20 @@ check_multiplettes_article_title <- function(pubs = kth_diva_pubs(), authors = k
 #' @importFrom rvest read_html html_text
 tidy_html <- function(x)
   rvest::html_text(rvest::read_html(charToRaw(x)))
+
+
+#' @importFrom methods formalArgs
+prefilter_pubs <- function(fn) {
+
+  CreatedDate <- NULL
+
+  if ("pubs" %in% formalArgs(fn)) {
+    formals(fn)$pubs <-
+      kth_diva_pubs() |> filter(grepl("QC ", Notes), CreatedDate < as.Date(Sys.Date() - 30))
+  }
+
+  fn()
+}
 
 check_multiplettes_title <- function(pubs = kth_diva_pubs(), aut = kth_diva_authors()) {
 
@@ -358,48 +373,48 @@ check_multiplettes_title <- function(pubs = kth_diva_pubs(), aut = kth_diva_auth
   )
 
   title_multiplettes <-
-    pubs %>%
-    mutate(clean_notes = map_chr(Notes, tidy_html)) %>%
-    mutate(lc_title = trimws(tolower(Title))) %>%
-    filter(!grepl(re, clean_notes)) %>%
-    #  filter(grepl("^Artikel", PublicationType)) %>%
-    group_by(lc_title, PublicationType) %>%
-    count(lc_title) %>%
-    arrange(desc(n)) %>%
+    pubs |>
+    mutate(clean_notes = map_chr(Notes, tidy_html)) |>
+    mutate(lc_title = trimws(tolower(Title))) |>
+    filter(!grepl(re, clean_notes)) |>
+    #  filter(grepl("^Artikel", PublicationType)) |>
+    group_by(lc_title, PublicationType) |>
+    count(lc_title) |>
+    arrange(desc(n)) |>
     filter(n > 1)
 
   tm <-
-    title_multiplettes %>%
+    title_multiplettes |>
     left_join(
-      pubs %>%
-        mutate(clean_notes = map_chr(Notes, tidy_html)) %>%
-        mutate(lc_title = trimws(tolower(Title))) %>%
-        filter(!grepl(re, clean_notes)) %>%
+      pubs |>
+        mutate(clean_notes = map_chr(Notes, tidy_html)) |>
+        mutate(lc_title = trimws(tolower(Title))) |>
+        filter(!grepl(re, clean_notes)) |>
         select(Title, lc_title, PID, PublicationType, DOI)
-      , by = c("lc_title", "PublicationType")) %>%
-    group_by(lc_title, n, PublicationType) %>%
-    summarize(pids = paste0(collapse = " ", PID), .groups = "drop") %>%
-    arrange(desc(n)) %>%
+      , by = c("lc_title", "PublicationType")) |>
+    group_by(lc_title, n, PublicationType) |>
+    summarize(pids = paste0(collapse = " ", PID), .groups = "drop") |>
+    arrange(desc(n)) |>
     collect()
 
   tm <-
-    tm %>%
-    tidyr::separate_rows(pids) %>%
-    mutate(PID = as.double(pids)) %>%
+    tm |>
+    tidyr::separate_rows(pids) |>
+    mutate(PID = as.double(pids)) |>
     inner_join(
-      pubs %>% mutate(lc_title = trimws(tolower(Title))),
-      by = c("lc_title", "PID", "PublicationType")) %>%
-    #mutate(year = lubridate::year(PublicationDate)) %>%
-    select(Title, n, PID, Year, LastUpdated, PublicationType, Notes, JournalISSN, JournalEISSN) %>%
-    mutate(clean_notes = map_chr(Notes, tidy_html)) %>%
+      pubs |> mutate(lc_title = trimws(tolower(Title))),
+      by = c("lc_title", "PID", "PublicationType")) |>
+    #mutate(year = lubridate::year(PublicationDate)) |>
+    select(Title, n, PID, Year, LastUpdated, PublicationType, Notes, JournalISSN, JournalEISSN) |>
+    mutate(clean_notes = map_chr(Notes, tidy_html)) |>
 #    count(JournalISSN, JournalEISSN)
     filter(JournalISSN == JournalEISSN | any(is.na(c(JournalISSN, JournalEISSN))))
 
   a <-
-    aut %>%
-    filter(PID %in% tm$PID) %>%
-    mutate(last_name = gsub("(.+?)(,.*)", "\\1", name)) %>%
-    group_by(PID) %>%
+    aut |>
+    filter(PID %in% tm$PID) |>
+    mutate(last_name = gsub("(.+?)(,.*)", "\\1", name)) |>
+    group_by(PID) |>
     summarise(initials = paste0(collapse = "", substr(last_name, 1, 1)))
 
   # NOTE: using non ascii characters here -> stringi::stri_escape_unicode can help!
@@ -421,26 +436,26 @@ check_multiplettes_title <- function(pubs = kth_diva_pubs(), aut = kth_diva_auth
     Preface
     Preliminaries
     Preview
-    Untitled")) %>% paste0(collapse  = "|")
+    Untitled")) |> paste0(collapse  = "|")
 
   b <-
-    tm %>%
-    inner_join(a, by = "PID") %>%
-    mutate(check_key = paste0(initials, "_", Year)) %>%
-    select(PID, Year, Title, PublicationType, LastUpdated, check_key, n, JournalISSN, JournalEISSN, clean_notes) %>%
-    group_by(check_key) %>%
-    add_count(check_key, sort = TRUE, name = "n_check") %>%
-    arrange(desc(n_check), desc(check_key), desc(Title), desc(LastUpdated)) %>%
-    ungroup() %>%
+    tm |>
+    inner_join(a, by = "PID") |>
+    mutate(check_key = paste0(initials, "_", Year)) |>
+    select(PID, Year, Title, PublicationType, LastUpdated, check_key, n, JournalISSN, JournalEISSN, clean_notes) |>
+    group_by(check_key) |>
+    add_count(check_key, sort = TRUE, name = "n_check") |>
+    arrange(desc(n_check), desc(check_key), desc(Title), desc(LastUpdated)) |>
+    ungroup() |>
     filter(!grepl(exceptions, Title))
 
 
   stoplist <- checks_exclusions()
 
-  b %>% anti_join(stoplist, by = c("PID", "Title")) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(Title = linkify(Title, target = "titlesearch")) %>%
-    collect() %>%
+  b |> anti_join(stoplist, by = c("PID", "Title")) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(Title = linkify(Title, target = "titlesearch")) |>
+    collect() |>
     select(PID, Year, Title, PublicationType, n_check, n, LastUpdated, JournalISSN, JournalEISSN, check_key, clean_notes)
 
 }
@@ -452,10 +467,10 @@ check_invalid_submission_status <- function(pubs = kth_diva_pubs()) {
 
   ScopusId <- ISI <- DOI <- PID <- Year <- NULL
 
-  pubs %>%
+  pubs |>
     filter(Status == "submitted" &
-        (!is.na(DOI) | !is.na(ISI) | !is.na(ScopusId))) %>%
-    select(PID, Year, ISI, DOI, ScopusId) %>%
+        (!is.na(DOI) | !is.na(ISI) | !is.na(ScopusId))) |>
+    select(PID, Year, ISI, DOI, ScopusId) |>
     mutate(
       PID = linkify(PID, target = "PID"),
       ISI = linkify(ISI, target = "ISI"),
@@ -469,18 +484,18 @@ check_missing_kthid <- function(authors = kth_diva_authors(), pubs = kth_diva_pu
 
   LastUpdated <- Year <- orgid <- ScopusId <- NULL
 
-  authors %>%
-    filter(!is.na(orgid) & is.na(kthid))  %>%
-    inner_join(pubs %>% select(PID, Year, LastUpdated), by = "PID") %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-#    mutate(pids = linkify(pids, target = "freetextsearch")) %>%
-    mutate(name = linkify(name, target = "freetextsearch")) %>%
-    mutate(orgid = linkify(orgid, target = "freetextsearch")) %>%
-    mutate(extorg = linkify(extorg, target = "freetextsearch")) %>%
-    mutate(orcid = linkify(orcid, target = "ORCID")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    arrange(desc(LastUpdated)) %>%
+  authors |>
+    filter(!is.na(orgid) & is.na(kthid))  |>
+    inner_join(pubs |> select(PID, Year, LastUpdated), by = "PID") |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+#    mutate(pids = linkify(pids, target = "freetextsearch")) |>
+    mutate(name = linkify(name, target = "freetextsearch")) |>
+    mutate(orgid = linkify(orgid, target = "freetextsearch")) |>
+    mutate(extorg = linkify(extorg, target = "freetextsearch")) |>
+    mutate(orcid = linkify(orcid, target = "ORCID")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    arrange(desc(LastUpdated)) |>
     select(PID, Year, name, LastUpdated, kthid, orcid, DOI, ScopusId)
 
 }
@@ -489,18 +504,18 @@ check_missing_aid <- function(authors = kth_diva_authors(), pubs = kth_diva_pubs
 
   LastUpdated <- Year <- orgid <- ScopusId <- NULL
 
-  authors %>%
-    filter(!is.na(orgid) & is.na(kthid))  %>%
-    inner_join(pubs %>% select(PID, Year, LastUpdated), by = "PID") %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    #    mutate(pids = linkify(pids, target = "freetextsearch")) %>%
-    mutate(name = linkify(name, target = "freetextsearch")) %>%
-    mutate(orgid = linkify(orgid, target = "freetextsearch")) %>%
-    mutate(extorg = linkify(extorg, target = "freetextsearch")) %>%
-    mutate(orcid = linkify(orcid, target = "ORCID")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    arrange(desc(LastUpdated)) %>%
+  authors |>
+    filter(!is.na(orgid) & is.na(kthid))  |>
+    inner_join(pubs |> select(PID, Year, LastUpdated), by = "PID") |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    #    mutate(pids = linkify(pids, target = "freetextsearch")) |>
+    mutate(name = linkify(name, target = "freetextsearch")) |>
+    mutate(orgid = linkify(orgid, target = "freetextsearch")) |>
+    mutate(extorg = linkify(extorg, target = "freetextsearch")) |>
+    mutate(orcid = linkify(orcid, target = "ORCID")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    arrange(desc(LastUpdated)) |>
     select(PID, Year, name, LastUpdated, aid = kthid, orcid, DOI, ScopusId)
 
 }
@@ -511,26 +526,26 @@ check_missing_orcids <- function(authors = kth_diva_authors()) {
   kthid <- orcid <- PID <- nd <- nd_casing <- has_casing <-
     na <- orcids <- NULL
 
-  authors %>%
-    select(kthid, orcid, PID) %>%
-    filter(!is.na(kthid), !(grepl("00000*|-", kthid))) %>%
-    group_by(kthid) %>%
+  authors |>
+    select(kthid, orcid, PID) |>
+    filter(!is.na(kthid), !(grepl("00000*|-", kthid))) |>
+    group_by(kthid) |>
     summarise(
       na = sum(is.na(orcid)),
       nd = n_distinct(orcid, na.rm = TRUE),
       nd_casing = n_distinct(toupper(orcid), na.rm = TRUE),
       orcids = paste0(collapse = ", ", na.omit(unique(orcid))),
-    ) %>%
+    ) |>
     mutate(
       has_casing = (nd != nd_casing)
-    ) %>%
-    arrange(desc(nd)) %>%
-    select(kthid, na, nd, nd_casing, has_casing, orcids) %>%
-    filter(nd == 1) %>%
-    arrange(desc(na)) %>%
-    filter(na > 9) %>%
-    mutate(cs = cumsum(na)) %>%
-    select(kthid, orcid = orcids, n_na_pubs = na) %>%
+    ) |>
+    arrange(desc(nd)) |>
+    select(kthid, na, nd, nd_casing, has_casing, orcids) |>
+    filter(nd == 1) |>
+    arrange(desc(na)) |>
+    filter(na > 9) |>
+    mutate(cs = cumsum(na)) |>
+    select(kthid, orcid = orcids, n_na_pubs = na) |>
     mutate(orcid = linkify(orcid, target = "ORCID"))
 
 }
@@ -538,10 +553,11 @@ check_missing_orcids <- function(authors = kth_diva_authors()) {
 check_missing_date <- function(pubs = kth_diva_pubs()) {
   # TODO: PublicationDate may not be needed (earlier such issues are fixed)
   Year <- NULL
-  pubs %>%
-    #filter(PublicationType == "Konferensbidrag") %>%
-    filter(is.na(PublicationDate), is.na(Year))  %>%
-    collect()
+  pubs |>
+    #filter(PublicationType == "Konferensbidrag") |>
+    filter(is.na(PublicationDate), is.na(Year))  |>
+    collect() |>
+    select(-any_of(c("ISRN", "NBN")))
 }
 
 check_missing_journals_identifiers <- function(pubs = kth_diva_pubs()) {
@@ -550,38 +566,38 @@ check_missing_journals_identifiers <- function(pubs = kth_diva_pubs()) {
     Status <- PublicationType <- NULL
 
   step <-
-    pubs %>%
-    filter(PublicationType == "Artikel i tidskrift") %>%
-    filter(is.na(JournalISSN) & is.na(JournalEISSN))  %>%
+    pubs |>
+    filter(PublicationType == "Artikel i tidskrift") |>
+    filter(is.na(JournalISSN) & is.na(JournalEISSN))  |>
     collect()
 
-  step %>%
-    mutate(PID = link_diva(PID, PID)) %>%
-    mutate(Title = linkify(Title, target = "titlesearch")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-    mutate(Name = linkify(Name, target = "freetextsearch")) %>%
-    mutate(Journal = linkify(Journal, target = "freetextsearch")) %>%
-    mutate(clean_notes = map_chr(Notes, tidy_html)) %>%
-    filter(!grepl("No ISSN", clean_notes)) %>%
-    filter(!Status %in% c("submitted", "accepted")) %>%
+  step |>
+    mutate(PID = link_diva(PID, PID)) |>
+    mutate(Title = linkify(Title, target = "titlesearch")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    mutate(Name = linkify(Name, target = "freetextsearch")) |>
+    mutate(Journal = linkify(Journal, target = "freetextsearch")) |>
+    mutate(clean_notes = map_chr(Notes, tidy_html)) |>
+    filter(!grepl("No ISSN", clean_notes)) |>
+    filter(!Status %in% c("submitted", "accepted")) |>
     select(PID, Year, Title, LastUpdated, starts_with("Journal"), PublicationType, Status, DOI, ScopusId, Name, clean_notes)
 }
 
 check_titles_book_chapters <- function(pubs = kth_diva_pubs()) {
 
   t1 <-
-    pubs %>%
+    pubs |>
       filter(PublicationType == "Kapitel i bok, del av antologi")
 
-  t1 %>%
-    group_by(Title) %>%
-    count(Title) %>%
-    filter(n > 1, nchar(Title) < 20) %>%
-    arrange(desc(n)) %>%
-    inner_join(t1 %>% select(PID, Title), by = "Title") %>%
-    group_by(Title, n) %>%
-    summarize(pids = paste0(collapse = " ", PID))  %>%
+  t1 |>
+    group_by(Title) |>
+    count(Title) |>
+    filter(n > 1, nchar(Title) < 20) |>
+    arrange(desc(n)) |>
+    inner_join(t1 |> select(PID, Title), by = "Title") |>
+    group_by(Title, n) |>
+    summarize(pids = paste0(collapse = " ", PID))  |>
     collect()
 
 }
@@ -589,16 +605,16 @@ check_titles_book_chapters <- function(pubs = kth_diva_pubs()) {
 check_invalid_ISI <- function(pubs = kth_diva_pubs()) {
 
   # from kth-library/bibliutils: r'A19\d{2}[A-Z\d]{5}\d{5}|000\d{12}'
-  re <- "^A19\\d{2}[A-Z\\d]{5}\\d{5}$|^000\\d{12}$"
+  re <- "^A19\\d{2}[A-Z\\d]{5}\\d{5}$|^000\\d{12}$|^001\\d{12}$"
 
   ISI <- PID <- Year <- DOI <- ScopusId <- NULL
 
-  pubs %>%
-    filter(!is.na(ISI)) %>%
-    #filter(nchar(ISI) != 15, !grepl("^A1", ISI), !grepl("^000", ISI))  %>%
-    filter(!grepl(re, ISI, perl = TRUE)) %>%
-    collect() %>%
-    select(PID, Year, ISI, DOI, ScopusId) %>%
+  pubs |>
+    filter(!is.na(ISI)) |>
+    #filter(nchar(ISI) != 15, !grepl("^A1", ISI), !grepl("^000", ISI))  |>
+    filter(!grepl(re, ISI, perl = TRUE)) |>
+    collect() |>
+    select(PID, Year, ISI, DOI, ScopusId) |>
     mutate(
       PID = linkify(PID, target = "PID"),
       ISI = linkify(ISI, target = "ISI"),
@@ -612,10 +628,10 @@ check_invalid_DOI <- function(pubs = kth_diva_pubs()) {
 
   ISI <- PID <- Year <- DOI <- ScopusId <- NULL
 
-  pubs %>%
-    filter(!is.na(DOI)) %>%
-    filter(!grepl("^10[.]", DOI)) %>%
-    select(PID, Year, DOI, ISI, ScopusId)  %>%
+  pubs |>
+    filter(!is.na(DOI)) |>
+    filter(!grepl("^10[.]", DOI)) |>
+    select(PID, Year, DOI, ISI, ScopusId)  |>
     mutate(
       PID = linkify(PID, target = "PID"),
       ISI = linkify(ISI, target = "ISI"),
@@ -630,21 +646,21 @@ check_multiplettes_DOI <- function(pubs = kth_diva_pubs()) {
 
   ScopusId <- Year <- DOI_link <- Scopus_link <- n_pids <- LastUpdated <- NULL
 
-  pubs %>%
-    select(PID, DOI) %>%
-    filter(!is.na(DOI)) %>%
-    count(DOI) %>%
-    filter(n > 1) %>%
-    arrange(desc(n)) %>%
-    inner_join(pubs, by = "DOI") %>%
-    select(PID, Year, Title, n_pids = n, DOI, ScopusId, LastUpdated, ISI) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(Title = linkify(Title, target = "titlesearch")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusId")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    collect() %>%
-    select(PID, Year, Title, n_pids, DOI, ISI, ScopusId, LastUpdated) %>%
+  pubs |>
+    select(PID, DOI) |>
+    filter(!is.na(DOI)) |>
+    count(DOI) |>
+    filter(n > 1) |>
+    arrange(desc(n)) |>
+    inner_join(pubs, by = "DOI") |>
+    select(PID, Year, Title, n_pids = n, DOI, ScopusId, LastUpdated, ISI) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(Title = linkify(Title, target = "titlesearch")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusId")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    collect() |>
+    select(PID, Year, Title, n_pids, DOI, ISI, ScopusId, LastUpdated) |>
     arrange(desc(n_pids), desc(DOI), desc(LastUpdated))
 }
 
@@ -652,21 +668,21 @@ check_multiplettes_scopusid <- function(pubs = kth_diva_pubs()) {
 
   ScopusId <- n_pids <- Year <- DOI_link <- ScopusId_link <- LastUpdated <-  NULL
 
-  pubs %>%
-    select(PID, DOI, ScopusId) %>%
-    filter(!is.na(ScopusId)) %>%
-    count(ScopusId) %>%
-    filter(n > 1) %>%
-    arrange(desc(n)) %>%
-    inner_join(kth_diva_pubs(), by = "ScopusId") %>%
-    select(DOI, Year, n_pids = n, PID, Title, ScopusId, ISI, LastUpdated) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(Title = linkify(Title, target = "titlesearch")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusId")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    collect() %>%
-    select(PID, Year, Title, n_pids, ScopusId, DOI, ISI, LastUpdated) %>%
+  pubs |>
+    select(PID, DOI, ScopusId) |>
+    filter(!is.na(ScopusId)) |>
+    count(ScopusId) |>
+    filter(n > 1) |>
+    arrange(desc(n)) |>
+    inner_join(kth_diva_pubs(), by = "ScopusId") |>
+    select(DOI, Year, n_pids = n, PID, Title, ScopusId, ISI, LastUpdated) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(Title = linkify(Title, target = "titlesearch")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusId")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    collect() |>
+    select(PID, Year, Title, n_pids, ScopusId, DOI, ISI, LastUpdated) |>
     arrange(desc(n_pids), desc(ScopusId), desc(LastUpdated))
 }
 
@@ -676,20 +692,20 @@ check_multiplettes_ISI <- function(pubs = kth_diva_pubs()) {
 
   ScopusId <- Year <- n_pids <- n_scopusid <- LastUpdated <- NULL
 
-  pubs %>%
-  select(PID, ISI, ScopusId) %>%
-  count(ISI) %>%
-  filter(n > 1, !is.na(ISI)) %>%
-  arrange(desc(n)) %>%
-  inner_join(kth_diva_pubs(), by = "ISI") %>%
-  select(ISI, Year, n_pids = n, PID, Title, ScopusId, LastUpdated, DOI) %>%
-  collect() %>%
-  select(PID, Year, Title, n_pids, ISI, DOI, ScopusId, LastUpdated) %>%
-  mutate(PID = linkify(PID, target = "PID")) %>%
-  mutate(ISI = linkify(ISI, target = "ISI")) %>%
-  mutate(DOI = linkify(DOI, target = "DOI")) %>%
-  mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-  mutate(Title = linkify(Title, target = "titlesearch")) %>%
+  pubs |>
+  select(PID, ISI, ScopusId) |>
+  count(ISI) |>
+  filter(n > 1, !is.na(ISI)) |>
+  arrange(desc(n)) |>
+  inner_join(kth_diva_pubs(), by = "ISI") |>
+  select(ISI, Year, n_pids = n, PID, Title, ScopusId, LastUpdated, DOI) |>
+  collect() |>
+  select(PID, Year, Title, n_pids, ISI, DOI, ScopusId, LastUpdated) |>
+  mutate(PID = linkify(PID, target = "PID")) |>
+  mutate(ISI = linkify(ISI, target = "ISI")) |>
+  mutate(DOI = linkify(DOI, target = "DOI")) |>
+  mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+  mutate(Title = linkify(Title, target = "titlesearch")) |>
   arrange(desc(n_pids), desc(ISI), desc(LastUpdated))
 
 }
@@ -703,12 +719,12 @@ check_invalid_aid <- function(authors = kth_diva_authors()) {
 
   ScopusId <- NULL
 
-  authors %>%
-    filter(!is.na(kthid)) %>%
-    filter(!grepl(re_aid, kthid)) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
+  authors |>
+    filter(!is.na(kthid)) |>
+    filter(!grepl(re_aid, kthid)) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
     mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
     select(aid = kthid, everything())
 
@@ -724,14 +740,15 @@ check_invalid_kthid <- function(authors = kth_diva_authors()) {
 
   ScopusId <- NULL
 
-  authors %>%
-    filter(!is.na(kthid)) %>%
-    filter(!grepl(re_kthid, kthid)) %>%
-    filter(!grepl(re_temp, kthid)) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID"))
+  authors |>
+    filter(!is.na(kthid)) |>
+    filter(!grepl(re_kthid, kthid)) |>
+    filter(!grepl(re_temp, kthid)) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    select(-any_of(c("ISRN", "NBN")))
 
 }
 
@@ -742,16 +759,17 @@ check_invalid_orcid <- function(authors = kth_diva_authors(), pubs = kth_diva_pu
   ScopusId <- Year <- LastUpdated <- NULL
 
   res <-
-    authors %>%
-    filter(!grepl(re, orcid) & !is.na(orcid)) %>%
+    authors |>
+    filter(!grepl(re, orcid) & !is.na(orcid)) |>
     left_join(
-      pubs %>% select(PID, Year, LastUpdated), by = "PID"
-    ) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-    select(PID, Year, everything())
+      pubs |> select(PID, Year, LastUpdated), by = "PID"
+    ) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    select(PID, Year, everything()) |>
+    select(-any_of(c("ISRN", "NBN")))
 
   return (res)
 
@@ -820,14 +838,14 @@ check_invalid_scopusid <- function(pubs = kth_diva_pubs()) {
 
   ScopusId <- NULL
 
-  pubs %>%
-    filter(!is.na(ScopusId)) %>%
-    filter(!grepl(re, ScopusId)) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
-    mutate(ISI = linkify(ISI, target = "ISI")) %>%
-    mutate(DOI = linkify(DOI, target = "DOI")) %>%
-    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) %>%
-    arrange(desc(Year)) %>%
+  pubs |>
+    filter(!is.na(ScopusId)) |>
+    filter(!grepl(re, ScopusId)) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    mutate(ISI = linkify(ISI, target = "ISI")) |>
+    mutate(DOI = linkify(DOI, target = "DOI")) |>
+    mutate(ScopusId = linkify(ScopusId, target = "ScopusID")) |>
+    arrange(desc(Year)) |>
     select(Title, Year, ScopusId, PID, ISI, DOI, Year)
 
 }
@@ -843,22 +861,22 @@ check_invalid_ISSN <- function(pubs = kth_diva_pubs()) {
   has_bad_check <- has_bad_format <- Year <- NULL
 
   bad_jeissn <-
-    pubs %>%
-    filter(!is.na(JournalEISSN)) %>% distinct(JournalEISSN, PID, Year) %>%
-    mutate(has_bad_check = !libbib::check_issn_check_digit(JournalEISSN, allow.hyphens = TRUE, errors.as.false = TRUE)) %>%
-    mutate(has_bad_format = !grepl(re, JournalEISSN)) %>%
+    pubs |>
+    filter(!is.na(JournalEISSN)) |> distinct(JournalEISSN, PID, Year) |>
+    mutate(has_bad_check = !libbib::check_issn_check_digit(JournalEISSN, allow.hyphens = TRUE, errors.as.false = TRUE)) |>
+    mutate(has_bad_format = !grepl(re, JournalEISSN)) |>
     filter(has_bad_check | has_bad_format)
 
   bad_jissn <-
-    pubs %>%
-    filter(!is.na(JournalISSN)) %>%
-    distinct(JournalISSN, PID, Year) %>%
-    mutate(has_bad_check = !libbib::check_issn_check_digit(JournalISSN, allow.hyphens = TRUE, errors.as.false = TRUE)) %>%
-    mutate(has_bad_format = !grepl(re, JournalISSN)) %>%
+    pubs |>
+    filter(!is.na(JournalISSN)) |>
+    distinct(JournalISSN, PID, Year) |>
+    mutate(has_bad_check = !libbib::check_issn_check_digit(JournalISSN, allow.hyphens = TRUE, errors.as.false = TRUE)) |>
+    mutate(has_bad_format = !grepl(re, JournalISSN)) |>
     filter(has_bad_check | has_bad_format)
 
-  bind_rows(bad_jeissn, bad_jissn) %>%
-    select(PID, Year, JournalEISSN, JournalISSN, everything()) %>%
+  bind_rows(bad_jeissn, bad_jissn) |>
+    select(PID, Year, JournalEISSN, JournalISSN, everything()) |>
     mutate(PID = linkify(PID, target="PID"))
 
 }
@@ -882,14 +900,14 @@ check_invalid_ISBN <- function(pubs = kth_diva_pubs()) {
 
   has_bad_check <- has_bad_format <- n_chars <- ISBN <- Year <- NULL
 
-  pubs %>%
-    filter(!is.na(ISBN)) %>% distinct(PID, ISBN, Year) %>%
-    tidyr::separate_rows(ISBN, sep = ";") %>%
-    mutate(n_chars = nchar(gsub("-", "", ISBN))) %>%
-    mutate(has_bad_format = n_chars != 10 & n_chars != 13) %>%
-    mutate(has_bad_check = map_lgl(ISBN, is_ok_isbn)) %>%
-    filter(has_bad_check | has_bad_format) %>%
-    mutate(PID = linkify(PID, target = "PID")) %>%
+  pubs |>
+    filter(!is.na(ISBN)) |> distinct(PID, ISBN, Year) |>
+    tidyr::separate_rows(ISBN, sep = ";") |>
+    mutate(n_chars = nchar(gsub("-", "", ISBN))) |>
+    mutate(has_bad_format = n_chars != 10 & n_chars != 13) |>
+    mutate(has_bad_check = map_lgl(ISBN, is_ok_isbn)) |>
+    filter(has_bad_check | has_bad_format) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
     mutate(ISBN = linkify(ISBN, target = "ISBN"))
 
 }
@@ -898,26 +916,26 @@ check_invalid_use_ISBN <- function(pubs = kth_diva_pubs()) {
 
   Year <- LastUpdated <- ISBN <- PublicationType <- NULL
 
-  pubs %>%
+  pubs |>
     filter(!is.na(ISBN) & Year >= 2020 & PublicationType %in% c(
       "Kapitel i bok, del av antologi",
       "Konferensbidrag",
-      "Artikel i tidskrift")) %>%
-    select(PID, Title, Year, PublicationType, ISBN, LastUpdated) %>%
+      "Artikel i tidskrift")) |>
+    select(PID, Title, Year, PublicationType, ISBN, LastUpdated) |>
     mutate(
       PID = linkify(PID, target = "PID"),
       Title = linkify(Title, target = "titlesearch"),
       ISBN = linkify(ISBN, target = "ISBN")
-    ) %>%
+    ) |>
     arrange(desc(LastUpdated))
 }
 
 
 check_invalid_authorname <- function(authors = kth_diva_authors()) {
 
-  authors %>%
-    filter(grepl("^[[:punct:]]{2,}", name)) %>%
-    select(PID, name, kthid, extorg) %>%
+  authors |>
+    filter(grepl("^[[:punct:]]{2,}", name)) |>
+    select(PID, name, kthid, extorg) |>
     mutate(PID = linkify(PID, target = "PID"))
 
 }
@@ -927,26 +945,26 @@ check_published <- function(pubs = kth_diva_pubs()) {
   Year <- is_QCorNQC <- NULL
 
   t0 <-
-    pubs %>%
+    pubs |>
     mutate(Notes = map_chr(Notes, tidy_html))
 
   t1 <-
-    t0 %>%
-    mutate(has_notes = grepl("QP", Notes)) %>%
+    t0 |>
+    mutate(has_notes = grepl("QP", Notes)) |>
     mutate(is_not_published = !is.na(Status) &
-             (Status %in% c("accepted", "aheadofprint", "inPress"))) %>%
+             (Status %in% c("accepted", "aheadofprint", "inPress"))) |>
     filter(has_notes, is_not_published)
 
   t2 <-
-    t0 %>%
-    mutate(Notes = map_chr(Notes, tidy_html)) %>%
-    mutate(is_QCorNQC = grepl("QC|NQC", Notes)) %>%
+    t0 |>
+    mutate(Notes = map_chr(Notes, tidy_html)) |>
+    mutate(is_QCorNQC = grepl("QC|NQC", Notes)) |>
     filter(Status == "submitted",
            is_QCorNQC | PublicationType == "Manuskript (preprint)")
 
-  bind_rows(t1, t2) %>%
+  bind_rows(t1, t2) |>
     select(PID, Year, PublicationType, has_notes,
-           is_not_published, Notes, is_QCorNQC)  %>%
+           is_not_published, Notes, is_QCorNQC)  |>
     collect()
 }
 
@@ -959,7 +977,7 @@ check_manuscripts_with_identifiers <- function(pubs = kth_diva_pubs()) {
   # https://doi.org/10.1101/2020.08.24.252296
   # https://doi.org/10.48550/ARXIV.2202.11577
 
-  re_exclude <- "^10.1101|^10.48550" # bioRxiv and arXiv
+  re_exclude <- "^10.1101|^10.48550|^10.2139" # bioRxiv,arXiv and SSRN
 
   ScopusId <- PMID <- Year <- LastUpdated <- NULL
 
@@ -989,29 +1007,31 @@ check_manuscripts_with_identifiers <- function(pubs = kth_diva_pubs()) {
 kth_diva_checks <- function() {
 
   checks <- list(
-    article_title_multiplettes = check_multiplettes_article_title(),
-    title_multiplettes = check_multiplettes_title(),
-    submission_status_invalid = check_invalid_submission_status(),
-    missing_kthid = check_missing_kthid(),
-    missing_orcids = check_missing_orcids(),
+    article_title_multiplettes = check_multiplettes_article_title |> prefilter_pubs(),
+    title_multiplettes = check_multiplettes_title |> prefilter_pubs(),
+    submission_status_invalid = check_invalid_submission_status |> prefilter_pubs(),
+    missing_kthid = check_missing_kthid |> prefilter_pubs(),
+    missing_orcids = check_missing_orcids |> prefilter_pubs(),
     #missing_affiliations = check_missing_affiliations(),
-    missing_confpubdate = check_missing_date(),
-    missing_journal_ids = check_missing_journals_identifiers(),
-    odd_book_chapters = check_titles_book_chapters(),
-    invalid_ISI = check_invalid_ISI(),
-    invalid_DOI = check_invalid_DOI(),
-    invalid_ISSN = check_invalid_ISSN(),
-    invalid_kthid = check_invalid_kthid(),
-    invalid_orcid = check_invalid_orcid(),
-    invalid_scopusid = check_invalid_scopusid(),
-    invalid_isbn = check_invalid_ISBN(),
-    invalid_use_isbn = check_invalid_use_ISBN(),
-    invalid_authorname = check_invalid_authorname(),
-    uncertain_published = check_published(),
-    multiplettes_scopusid = check_multiplettes_scopusid(),
-    multiplettes_DOI = check_multiplettes_DOI(),
-    multiplettes_ISI = check_multiplettes_ISI(),
-    manuscripts_with_identifiers = check_manuscripts_with_identifiers(),
+    missing_confpubdate = check_missing_date |> prefilter_pubs(),
+    missing_journal_ids = check_missing_journals_identifiers |> prefilter_pubs(),
+    odd_book_chapters = check_titles_book_chapters |> prefilter_pubs(),
+    invalid_ISI = check_invalid_ISI |> prefilter_pubs(),
+    invalid_DOI = check_invalid_DOI |> prefilter_pubs(),
+    invalid_ISSN = check_invalid_ISSN |> prefilter_pubs(),
+    invalid_kthid = check_invalid_kthid |> prefilter_pubs(),
+    invalid_orcid = check_invalid_orcid |> prefilter_pubs(),
+    invalid_scopusid = check_invalid_scopusid |> prefilter_pubs(),
+    invalid_isbn = check_invalid_ISBN |> prefilter_pubs(),
+    invalid_use_isbn = check_invalid_use_ISBN |> prefilter_pubs(),
+    invalid_authorname = check_invalid_authorname |> prefilter_pubs(),
+    uncertain_published = check_published |> prefilter_pubs(),
+    multiplettes_scopusid = check_multiplettes_scopusid |> prefilter_pubs(),
+    multiplettes_DOI = check_multiplettes_DOI |> prefilter_pubs(),
+    multiplettes_ISI = check_multiplettes_ISI |> prefilter_pubs(),
+    manuscripts_with_identifiers = check_manuscripts_with_identifiers |> prefilter_pubs(),
+    non_qc = check_non_qc(),
+    non_qc_stale = check_non_qc_stale(),
     swepub = swepub_checks(
       year_beg = lubridate::year(Sys.Date()) - 1,
       year_end = lubridate::year(Sys.Date())
@@ -1019,10 +1039,13 @@ kth_diva_checks <- function() {
   )
 
   stats <-
-    checks %>%
-    purrr::map(function(x) ifelse(is.null(x), NA, nrow(x))) %>%
-    tibble::as_tibble() %>%
+    checks |>
+    purrr::map(function(x) ifelse(is.null(x), NA, nrow(x))) |>
+    tibble::as_tibble() |>
     tidyr::pivot_longer(cols = everything())
+
+  stats[stats$name == "non_qc_stale", "value"] <-
+    checks$non_qc_stale |> getElement("n") |> sum()
 
   checks$stats <- stats
 
@@ -1066,9 +1089,9 @@ diva_checks <- function(authors, pubs, config = diva_config()) {
   )
 
   stats <-
-    checks %>%
-    purrr::map(function(x) ifelse(is.null(x), NA, nrow(x))) %>%
-    tibble::as_tibble() %>%
+    checks |>
+    purrr::map(function(x) ifelse(is.null(x), NA, nrow(x))) |>
+    tibble::as_tibble() |>
     tidyr::pivot_longer(cols = everything())
 
   checks$stats <- stats
@@ -1091,8 +1114,8 @@ check_remap_colnames <- function(x) {
   colnamez <- kthcorpus::check_mapping
 
   nm <-
-    tibble(colname_en = x) %>%
-    left_join(colnamez, by = "colname_en") %>%
+    tibble(colname_en = x) |>
+    left_join(colnamez, by = "colname_en") |>
     mutate(desc_swe = ifelse(is.na(desc_swe), colname_en, desc_swe))
 
   setNames(nm$colname_en, nm$desc_swe)
@@ -1126,40 +1149,40 @@ check_missing_affiliations <- function(authors = kth_diva_authors()) {
   # No affs in string: Bonde, Ingrid
   # parsing PID [1576494] [================================>-------]  82% eta:  7m
   # No affs in string: Almlöf, Jonas [u1f2lz4l] [0000-0002-8721-3580]
-  authors %>%
-    filter(!is.na(kthid) & is.na(n_aff_kth) & is.na(n_aff_ext)) %>%
-    arrange(desc(n_pid), desc(kthid)) %>%
+  authors |>
+    filter(!is.na(kthid) & is.na(n_aff_kth) & is.na(n_aff_ext)) |>
+    arrange(desc(n_pid), desc(kthid)) |>
     select(PID, name, kthid, orcid, n_pid)
 }
 
 # cma <- check_missing_affiliations()
 #
 # suggest_affiliation <- function(id)
-#   kth_diva_authors() %>%
-#   filter(kthid == id) %>%
-#   group_by(orcid, orgids) %>%
-#   add_count(sort = TRUE) %>%
-#   arrange(desc(n), desc(orcid)) %>%
-#   mutate(kthid = id) %>%
-#   mutate(n_variants = n_groups(.)) %>%
-#   head(1) %>%
+#   kth_diva_authors() |>
+#   filter(kthid == id) |>
+#   group_by(orcid, orgids) |>
+#   add_count(sort = TRUE) |>
+#   arrange(desc(n), desc(orcid)) |>
+#   mutate(kthid = id) |>
+#   mutate(n_variants = n_groups(.)) |>
+#   head(1) |>
 #   select(kthid, orcid, orgids, n_variants)
 #
 # suggest_affiliations <- function(ids)
-#   ids %>%
-#   map_dfr(suggest_affiliation) %>%
+#   ids |>
+#   map_dfr(suggest_affiliation) |>
 #   arrange(desc(n_variants))
 #
 # ids <-
-#   cma %>%
-#   filter(n_pid > 200) %>%
+#   cma |>
+#   filter(n_pid > 200) |>
 #   pull(kthid)
 #
 # sa <-
-#   suggest_affiliations(ids) %>%
+#   suggest_affiliations(ids) |>
 #   select(suggested_orcid = orcid, suggested_orgid = orgids, everything())
 #
-# cma %>% left_join(sa, by = "kthid")
+# cma |> left_join(sa, by = "kthid")
 
 #' Path to rmarkdown report
 #' @export
@@ -1296,9 +1319,9 @@ check_identifiers_with_unicode <- function(pub = kth_diva_pubs(), aut = kth_diva
   }
 
   report_issue <- function(data, f, label) {
-    tibble(rowid = check_field(data, f), field = f, dataset = label) %>%
-      left_join(data %>% mutate(rowid = as.numeric(1:nrow(data))), by = "rowid") %>%
-      mutate(issue = extract_unicode(getElement(., f))) %>%
+    tibble(rowid = check_field(data, f), field = f, dataset = label) |>
+      left_join(data |> mutate(rowid = as.numeric(1:nrow(data))), by = "rowid") |>
+      mutate(issue = extract_unicode(getElement(., f))) |>
       select(PID, dataset, field, unicode_issue=issue)
   }
 
@@ -1315,7 +1338,7 @@ check_identifiers_with_unicode <- function(pub = kth_diva_pubs(), aut = kth_diva
       )
     )
 
-  issues %>% mutate(PID = linkify(PID, target = "PID"))
+  issues |> mutate(PID = linkify(PID, target = "PID"))
 }
 
 checks_exclusions_url <- function(csvfile = "exceptions_check_multiplettes_title.csv")
@@ -1324,7 +1347,7 @@ checks_exclusions_url <- function(csvfile = "exceptions_check_multiplettes_title
 
 checks_exclusions <- function(csvfile = checks_exclusions_url()) {
 
-  res <- csvfile %>%
+  res <- csvfile |>
     readr::read_csv(col_types = "dc", locale = readr::locale(encoding = "UTF-8"))
 
   is_valid <- ncol(res) == 2 & all(names(res) %in% c("PID", "Title"))
@@ -1344,22 +1367,22 @@ check_invalid_orgid <- function(aut = kth_diva_authors(), pubs = kth_diva_pubs()
     alt_pids <- alt_pidz <- stale_pids <- stale_pidz <- NULL
 
   diva_orgs <-
-    diva_organisations() %>%
+    diva_organisations() |>
     mutate(orgid = as.character(orgid))
 
   orgs_closed <-
-    diva_orgs %>%
-    filter(is_closed) %>%
+    diva_orgs |>
+    filter(is_closed) |>
     arrange(desc(closed_date))
 
   # authors belonging to closed diva organisation ids
   aut_stale <-
-    aut %>%
-    inner_join(orgs_closed, by = "orgid") %>%
-    arrange(desc(closed_date)) %>%
-    group_by(name, orcid, kthid, PID, orgid, unit_en) %>%
-    count() %>%
-    collect() %>%
+    aut |>
+    inner_join(orgs_closed, by = "orgid") |>
+    arrange(desc(closed_date)) |>
+    group_by(name, orcid, kthid, PID, orgid, unit_en) |>
+    count() |>
+    collect() |>
     ungroup()
 
   pubs_stale <-
@@ -1378,19 +1401,19 @@ check_invalid_orgid <- function(aut = kth_diva_authors(), pubs = kth_diva_pubs()
 
   # candidates for non-closed org belongings
   candidate_orgs <-
-    aut %>%
-      anti_join(orgs_closed, by = "orgid") %>%
-      group_by(name, orcid, kthid, PID, orgid) %>%
-      count() %>%
-      collect() %>%
-      ungroup() %>%
+    aut |>
+      anti_join(orgs_closed, by = "orgid") |>
+      group_by(name, orcid, kthid, PID, orgid) |>
+      count() |>
+      collect() |>
+      ungroup() |>
       inner_join(
-        diva_orgs %>%
-          filter(!is_closed) %>%
+        diva_orgs |>
+          filter(!is_closed) |>
           select(is_closed, closed_date, orgid),
         by = "orgid"
-      ) %>%
-      group_by(name, orcid, kthid) %>%
+      ) |>
+      group_by(name, orcid, kthid) |>
       summarise(
         orgids = paste0(collapse = " ", unique(orgid)),
         pids = paste0(collapse = " ", unique(PID)),
@@ -1400,24 +1423,24 @@ check_invalid_orgid <- function(aut = kth_diva_authors(), pubs = kth_diva_pubs()
 
   # authors with stale orgids and their corresponding valid orgids
   recommendations <-
-    pubs_stale %>%
-      group_by(name, orcid, kthid) %>%
+    pubs_stale |>
+      group_by(name, orcid, kthid) |>
       summarize(
         stale_pids = paste(collapse = " ", unique(PID)),
         stale_orgids = paste(collapse = " ", unique(orgid))
-      ) %>%
+      ) |>
       left_join(
         candidate_orgs,
         by = c("name", "orcid", "kthid")
-      ) %>%
-      collect() %>%
+      ) |>
+      collect() |>
       select(
         everything(),
         alt_orgids = orgids,
         alt_pids = pids,
         alt_n_orgs = n_orgs,
         alt_n_pids = n_pids
-      ) %>%
+      ) |>
       arrange(desc(alt_n_pids), -desc(alt_n_orgs), name)
 
   # these have one other belonging that is not closed
@@ -1452,3 +1475,45 @@ check_invalid_orgid <- function(aut = kth_diva_authors(), pubs = kth_diva_pubs()
     mutate(alt_orgids = orgid_to_link(alt_orgids)) #|> DT::datatable(escape = F)
 
 }
+
+# TODO: add these checks and refactor existing checks
+# (changes needed if also including non-qc publications)
+
+# - all checks should start with ...
+#   pubs <-
+#      pubs |> filter(grepl("QC ", Notes), CreatedDate < as.Date(Sys.Date() - 30))
+
+# results can be placed under missing/"saknat"
+check_non_qc <- function(pubs = kth_diva_pubs()) {
+
+  # one check for which records are not quality checked
+  # these publications are recent (from this year) but not marked with QC
+
+  CreatedDate <- LastUpdated <- NULL
+
+  pubs |>
+    filter(CreatedDate > as.Date("2023-01-01")) |>
+    filter(CreatedDate < as.Date(Sys.Date() - 30), !grepl("QC ", Notes)) |>
+    select(PID, CreatedDate, LastUpdated) |>
+    mutate(PID = linkify(PID, target = "PID"))
+}
+
+check_non_qc_stale <- function(pubs = kth_diva_pubs()) {
+
+  # publications which are not tagged with "QC" but are created more than 30 days ago
+  # aggregated by year and publication type
+
+  CreatedDate <- LastUpdated <- y <- NULL
+
+  pubs |>
+    filter(CreatedDate < as.Date(Sys.Date() - 30), !grepl("QC ", Notes)) |>
+    select(PID, CreatedDate, LastUpdated, PublicationType) |>
+    arrange(desc(CreatedDate)) |>
+    mutate(PID = linkify(PID, target = "PID")) |>
+    group_by(PublicationType, year(CreatedDate)) |>
+    count() |>
+    ungroup() |>
+    rename(y = 2) |>
+    arrange(desc(y))
+}
+

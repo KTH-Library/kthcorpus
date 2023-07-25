@@ -53,65 +53,11 @@ scopus_config <- function(quiet = FALSE) {
   )
 }
 
-#' Retrieve publications from Scopus API from KTH - The Royal Institute of Technology.
-#'
-#' This function allows for using the "load date" when fetching publications for
-#' KTH - The Royal Institute of Technology. By default the time interval for the
-#' previous two weeks is used.
-#'
-#' Note: when using a subscriber API key, requests are only allowed from
-#' institutional IPs. From Elsevier's API documentation:
-#'
-#' "Elsevier Research Products APIs rely primarily on Institutional IP address
-#' for authentication. API access through proxies is not supported, however
-#' Elsevier will provide remote access direct to the APIs using a special
-#' access credential ("Institutional Token").
-#' If you are working away from your main institutional network
-#' or your institution accesses Scopus.com, Scival.com, or ScienceDirect.com
-#' through a proxy, please contact us to enquire about Institutional Token access."
-#'
-#' The rate limits that apply for using Scopus Search is a max paging length of 25 for
-#' complete views with a 5000 item total results limit and weekly 20k results and at
-#' the most 9 requests per second.
-#'
-#' @param beg_loaddate date expressed as "yyyymmdd", by default current date minus 7 days
-#' @param end_loaddate date expressed as "yyyymmdd", by default current date
 #' @importFrom httr GET add_headers content
-#' @importFrom glue glue
 #' @importFrom purrr map_chr possibly pmap map map_df
 #' @importFrom dplyr bind_cols
 #' @importFrom progress progress_bar
-#' @export
-scopus_search_pubs_kth <- function(beg_loaddate, end_loaddate) {
-
-  if (missing(end_loaddate))
-    end_loaddate <- Sys.Date() %>% format_date()
-
-  if (missing(beg_loaddate))
-    beg_loaddate <- (Sys.Date() - 14) %>% format_date()
-
-  beg_pubyear <- 2019L
-  id_affiliation <- 60002014L
-
-  criteria <- glue::glue(
-    'AFFIL(((kth*) OR (roy* AND inst* AND tech*) OR ("Roy. Inst. T") OR ',
-    '(alfven) OR (kung* AND tek* AND hog*) OR (kung* AND tek* AND h\\u00f6g*) OR ',
-    '(kgl AND tek* AND hog*) OR (kung* AND tek* AND hg*) OR ',
-    '(roy* AND tech* AND univ*)) AND (Sweden)) OR ',
-    'AF-ID("The Royal Institute of Technology KTH" {id_affiliation}) AND ',
-    'orig-load-date aft {beg_loaddate} AND orig-load-date bef {end_loaddate} AND ',
-    'pubyear aft {beg_pubyear} AND NOT PUBSTAGE(AIP)'
-  )
-
-
-  # req <- httr::GET("https://api.elsevier.com/content/search/scopus",
-  #   query = list(
-  #     query = criteria,
-  #     apiKey = scopus_config()$apikey,
-  #     view = "COMPLETE"
-  #   ),
-  #   add_headers("Content-Type" = "application/xml")
-  # )
+scopus_search_query <- function(criteria) {
 
   req <- scopus_req(criteria, start = 0, count = 25)
 
@@ -167,16 +113,101 @@ scopus_search_pubs_kth <- function(beg_loaddate, end_loaddate) {
 
 }
 
+#' Retrieve publications from Scopus Search API for specified Scopus ids
+#'
+#' Note: For long vectors of scopus eids, a warning will be issued
+#' if the query generates a long query string parameter that may
+#' run into issues with recommendations regarding RFC 2616.
+#'
+#' @param eid character vector of scopus eids, such as "2-s2.0-85144114333"
+#' @importFrom glue glue
+#' @export
+scopus_search_id <- function(eid) {
+
+  if (length(eid) > 1)
+    eid <- paste0(collapse = " OR ", eid)
+
+  criteria <- glue::glue(
+    "eid({eid})"
+  )
+
+  if (nchar(criteria) > 2048)
+    warning("Long query string parameter (use < 2048 chars, see RFC 2616)... ")
+
+  scopus_search_query(criteria)
+
+}
+
+#' Retrieve publications from Scopus API from KTH - The Royal Institute of Technology.
+#'
+#' This function allows for using the "load date" when fetching publications for
+#' KTH - The Royal Institute of Technology. By default the time interval for the
+#' previous two weeks is used.
+#'
+#' Note: when using a subscriber API key, requests are only allowed from
+#' institutional IPs. From Elsevier's API documentation:
+#'
+#' "Elsevier Research Products APIs rely primarily on Institutional IP address
+#' for authentication. API access through proxies is not supported, however
+#' Elsevier will provide remote access direct to the APIs using a special
+#' access credential ("Institutional Token").
+#' If you are working away from your main institutional network
+#' or your institution accesses Scopus.com, Scival.com, or ScienceDirect.com
+#' through a proxy, please contact us to enquire about Institutional Token access."
+#'
+#' The rate limits that apply for using Scopus Search is a max paging length of 25 for
+#' complete views with a 5000 item total results limit and weekly 20k results and at
+#' the most 9 requests per second.
+#'
+#' @param beg_loaddate date expressed as "yyyymmdd", by default current date minus 7 days
+#' @param end_loaddate date expressed as "yyyymmdd", by default current date
+#' @importFrom glue glue
+#' @export
+scopus_search_pubs_kth <- function(beg_loaddate, end_loaddate) {
+
+  if (missing(end_loaddate))
+    end_loaddate <- Sys.Date() %>% format_date()
+
+  if (missing(beg_loaddate))
+    beg_loaddate <- (Sys.Date() - 14) %>% format_date()
+
+  beg_pubyear <- 2019L
+  id_affiliation <- 60002014L
+
+  criteria <- glue::glue(
+    'AFFIL(((kth*) OR (roy* AND inst* AND tech*) OR ("Roy. Inst. T") OR ',
+    '(alfven) OR (kung* AND tek* AND hog*) OR (kung* AND tek* AND h\\u00f6g*) OR ',
+    '(kgl AND tek* AND hog*) OR (kung* AND tek* AND hg*) OR ',
+    '(roy* AND tech* AND univ*)) AND (Sweden)) OR ',
+    'AF-ID("The Royal Institute of Technology KTH" {id_affiliation}) AND ',
+    'orig-load-date aft {beg_loaddate} AND orig-load-date bef {end_loaddate} AND ',
+    'pubyear aft {beg_pubyear} AND NOT PUBSTAGE(AIP)'
+  )
+
+
+  # req <- httr::GET("https://api.elsevier.com/content/search/scopus",
+  #   query = list(
+  #     query = criteria,
+  #     apiKey = scopus_config()$apikey,
+  #     view = "COMPLETE"
+  #   ),
+  #   add_headers("Content-Type" = "application/xml")
+  # )
+
+  scopus_search_query(criteria)
+}
+
 #' Fetch abstract given Scopus ID
 #' @param sid ScopusID
 #' @param endpoint the endpoint to use for the request (default value provided)
+#' @param timeout the timeout before the request fails, by default 10L
 #' @details see https://dev.elsevier.com/documentation/AbstractRetrievalAPI.wadl
 #' @examples
 #' \dontrun{
 #'   scopus_req_abstract("SCOPUS_ID:85140569271")
 #' }
 scopus_req_abstract <- function(sid,
-  endpoint = "https://api.elsevier.com/content/abstract/scopus_id/") {
+  endpoint = "https://api.elsevier.com/content/abstract/scopus_id/", timeout = 10L) {
 
   resp <- httr::GET(
     url = sprintf(paste0(endpoint, "%s"), sid),
@@ -186,7 +217,7 @@ scopus_req_abstract <- function(sid,
       view = "FULL" #"FULL"
     )),
     httr::add_headers("Content-Type" = "application/xml"),
-    httr::timeout(10L)
+    httr::timeout(timeout)
   )
 
   scopus_check_status(resp)
@@ -275,6 +306,7 @@ scopus_fields <- function() {
       prism:publicationName
       prism:issn
       prism:eIssn
+      prism:isbn
       prism:volume
       prism:issueIdentifier
       prism:pageRange
@@ -304,7 +336,7 @@ scopus_fields <- function() {
 #' @importFrom dplyr select any_of
 parse_scopus_entries <- function(xml) {
 
-    afid <- NULL
+    afid <- `prism:isbn` <- NULL
 
     fields <- scopus_fields()
 
@@ -314,6 +346,11 @@ parse_scopus_entries <- function(xml) {
 
     mypubs <-
       tibble::as_tibble(setNames(mylist, nm = fields))
+
+    mypubs <- mypubs |> mutate(`prism:isbn` = `prism:isbn` |>
+      map(function(x) eval(parse(text = x))) |>
+      map_chr(function(x) map(x, "$") |> unlist() |> paste(collapse = " "))
+    )
 
     t1 <- xml %>% purrr::map(function(x) tibble::tibble(sid = purrr::pluck(x, "dc:identifier")))
 
@@ -506,9 +543,14 @@ pluck_raw_org <- function(x) {
 #' @importFrom dplyr bind_cols tibble
 scopus_abstract_extended <- function(sid) {
 
-  #sid <- sidz[1]
+  # clean identifiers (if prefigated, ie long scopus ids or eids)
+  is_eid <- any(grepl("^2-s2.0-", sid))
+  is_long_sid <- any(grepl("^SCOPUS_ID:", sid))
 
-  abstract <- scopus_req_abstract(sid = sid) |> httr::content()
+  if (is_eid | is_long_sid)
+    sid <- gsub("(2-s2.0-)|(SCOPUS_ID:)", "", sid)
+
+  abstract <- scopus_req_abstract(sid = sid, timeout = 20L) |> httr::content()
 
   text <- abstract$`abstracts-retrieval-response`$coredata |>
     pluck(.default = NA_character_, "dc:description")
@@ -613,7 +655,7 @@ scopus_abstract_extended <- function(sid) {
     select(id, i = name, everything())
 
   aff <-
-    map(ag, "affiliation") %>% map(tibble::enframe) |>
+    map(ag, "affiliation") |>  map(tibble::enframe) |>
     map(function(x) x |> rowwise() |>
       mutate(value = paste0(collapse = " ", unique(unlist(value))))) |>
     map(function(x) mutate(x, name = gsub("@", "x_", name))) |>
@@ -625,7 +667,7 @@ scopus_abstract_extended <- function(sid) {
     left_join(raw_org, by = "id")
 
   authorgroup <-
-    aut %>% left_join(aff, by = "id") |>
+    aut  |>  left_join(aff, by = "id") |>
     dplyr::bind_cols(sid = sid) |>
     select(sid, everything())
 
@@ -651,7 +693,7 @@ scopus_abstract_extended <- function(sid) {
       "dc:publisher srctype prism:coverDate prism:aggregationType source-id
       citedby-count prism:volume subtype openaccess prism:issn prism:eIssn
       prism:issueIdentifier subtypeDescription prism:publicationName openaccessFlag
-      prism:doi prism:startingPage dc:identifier") |>
+      prism:doi prism:startingPage prism:endingPage dc:identifier") |>
     unlist()
 
   coredata <-
@@ -705,14 +747,137 @@ scopus_abstract_extended <- function(sid) {
   #   a |> rget("authkeywords") #: null
   # )
 
+  ci <- data.frame()
+
+  if (abstract$`abstracts-retrieval-response`$coredata$subtype == "cp") {
+    beg <- coredata$"prism:startingPage"
+    end <- coredata$"prism:endingPage"
+    ci <- parse_confinfo(abstract) |>
+      tibble::add_column(conf_ext_start = beg, conf_ext_end = end)
+  }
+
   list(
     scopus_abstract = coredata |> bind_cols(
       sid = sid,
       `dc:description` = tidy_xml(text)
     ),
+    scopus_authors = aut,
     scopus_authorgroup = authorgroup,
-    scopus_correspondence = correspondence #,
+    scopus_correspondence = correspondence,
+    scopus_confinfo = ci
   )
+}
+
+parse_confinfo <- function(abstract) {
+
+  date_beg <- date_end <- beg <- end <-
+    conf_details <- conf_sourcetitle <- conf_issuetitle <-
+    date_beg_day <- date_beg_month <- date_beg_year <-
+    date_end_day <- date_end_month <- date_end_year <-
+    y <- m <- d <- Var1 <- Var2 <- var <- is_populated <- NULL
+
+  # sids <- paste0("SCOPUS_ID:85162277054 SCOPUS_ID:85162208085 ",
+  #   "SCOPUS_ID:85162205964 SCOPUS_ID:85162194454 SCOPUS_ID:85162223284 ",
+  #   "SCOPUS_ID:85162210747 SCOPUS_ID:85162197463 SCOPUS_ID:85162224833 ",
+  #   "SCOPUS_ID:85162265813 SCOPUS_ID:85162219211 SCOPUS_ID:85162253865 ",
+  #   "SCOPUS_ID:85162196928 SCOPUS_ID:85162258109 SCOPUS_ID:85162256230 ",
+  #   "SCOPUS_ID:85162191207 SCOPUS_ID:85162217474 SCOPUS_ID:85162268691 ",
+  #   "SCOPUS_ID:85162208893 SCOPUS_ID:85162201437 SCOPUS_ID:85162197216 ",
+  #   "SCOPUS_ID:85162005310 SCOPUS_ID:85162006176 SCOPUS_ID:85161974029 ",
+  #   "SCOPUS_ID:85161999337 SCOPUS_ID:85161990555 SCOPUS_ID:85161889600 ",
+  #   "SCOPUS_ID:85161931704 SCOPUS_ID:85161853142 SCOPUS_ID:85161836541") |>
+  #   strsplit(split = "\\s+") |> unlist() |> gsub(pattern = "SCOPUS_ID:", replacement = "")
+  #
+  # sid <- sids[1]
+  # abstract <- scopus_req_abstract(sid = sid) |> httr::content()
+
+  source <-
+    #eid |> scopus_req_abstract() |>  httr::content() |>
+    abstract$`abstracts-retrieval-response`$item$bibrecord$head$source
+
+  event <- source$`additional-srcinfo`$conferenceinfo$confevent
+
+  aci <- list(
+    conf_title = event$confname,
+    city = event$conflocation$city,
+    country = event$conflocation$`@country`,
+    date_end = event$confdate$enddate,
+    date_beg = event$confdate$startdate,
+    conf_sourcetitle = source$sourcetitle,
+    conf_seriestitle = event$confseriestitle,
+    conf_issuetitle = source$issuetitle
+  )
+
+  wc <- kthcorpus::countries_iso3
+
+  my_aci <-
+    list(aci) |>
+    tibble::enframe() |>
+    tidyr::unnest_wider(col = "value") |>
+    tidyr::unnest_wider(col = date_beg, names_sep = "") |>
+    tidyr::unnest_wider(col = date_end, names_sep = "") |>
+    dplyr::rename_with(.fn = function(x) gsub("@", "_", x), dplyr::starts_with("date")) |>
+    left_join(wc, by = "country")
+
+  has_range <-
+    sprintf("date_%s", c("beg", "end")) |>
+    expand.grid(c("year", "month", "day")) |>
+    mutate(var = paste(Var1, Var2, sep = "_")) |>
+    mutate(is_populated = var %in% names(my_aci)) |>
+    select(var, is_populated)
+
+  has_pattern <- function(re)
+    has_range |> filter(is_populated) |> pull(var) |>
+    grepl(pattern = re) |> all()
+
+  has_end_date <- has_pattern("_end_")
+  has_beg_date <- has_pattern("_beg_")
+
+  if (all(has_range$is_populated)) {
+    res <- my_aci |>
+    mutate(
+      beg = lubridate::make_date(date_beg_year, date_beg_month, date_beg_day),
+      end = lubridate::make_date(date_end_year, date_end_month, date_end_day),
+      beg_my = paste(months(beg), year(beg)),
+      end_my = paste(months(end), year(end)),
+      dur = purrr::pmap_chr(
+        .l = list(end, beg),
+        .f = function(x, y) {
+          #x <- ifelse(x != "NA", x, NA)
+          na.omit(c(x, y)) |> format("%b %-d %Y") |> paste(collapse = " - ")
+        }
+      )
+    ) |>
+    mutate(conf_details = glue::glue("{conf_title}, {city}, {country_name}, {dur}")) |>
+    select(conf_title = conf_issuetitle, conf_details) |>
+    mutate(conf_subtitle = NA)
+    return(res)
+  } else if (has_end_date) {
+    res <-
+      my_aci |> rename(
+        y = date_end_year,
+        m = date_end_month,
+        d = date_end_day
+      )
+  } else if (has_beg_date) {
+    res <-
+      my_aci |> rename(
+        y = date_beg_year,
+        m = date_beg_month,
+        d = date_beg_day
+      )
+  } else {
+    stop("Cannot find date range or complete date for conference")
+  }
+
+  res |>
+    mutate(
+      end = lubridate::make_date(y, m, d),
+      dur = end |> format("%b %-d %Y") |> glue::glue(na = "")
+    ) |>
+    mutate(conf_details = glue::glue("{conf_title}, {city}, {country_name}, {dur}")) |>
+    select(conf_title = conf_issuetitle, conf_details) |>
+    mutate(conf_subtitle = NA)
 }
 
 tidy_xml <- function(x, cdata = FALSE) {
@@ -833,3 +998,4 @@ rget <- function(x, field, siblings = NULL, parents = NULL, new_name = field) {
   colnames(ret) <- new_name
   return (ret)
 }
+

@@ -330,6 +330,19 @@ myDT(checks$manuscripts_with_identifiers)
 myDT(checks$invalid_use_isbn)
 ```
 
+### Årets icke-QC:ade `r stats("non_qc")`
+
+```{r}
+myDT(checks$non_qc)
+```
+
+### Äldre icke-QC:ade `r stats("non_qc_stale")`
+
+```{r}
+myDT(checks$non_qc_stale)
+```
+
+
 Externt {data-icon="fa-university" data-width=1200}
 =============================
 
@@ -412,9 +425,9 @@ KuraTHor fångar upp poster med ISI som:
 
 eller
 
-* inte inleds med `A1` eller `000` (tre nollor) 
+* inte inleds med `A1`, `000` eller `001` 
 
-> Exempel på korrekta ISI: `000642153100001` eller `A1975AU56200018` 
+> Exempel på korrekta ISI: `000642153100001`, `001522153103001` eller `A1975AU56200018` 
 
 *Ogiltigt ScopusID*
 
@@ -440,7 +453,7 @@ ISSN/EISSN presenteras ofta med bindestreck mellan de fyra första och de fyra s
 
 KuraTHor fångar upp poster som har ogiltiga ORCID utifrån antal tecken samt värdet på kontrollsiffran. Ett ORCID skall innehålla fyra grupper om vardera fyra siffror (0-9) separerade med bindestreck. Som sista tecken är även bokstaven X tillåten och representerar då siffran tio. Den sista siffran i strängen är en kontrollsiffra. Kontrollen accepterar inte ORCID utan bindestreck.
 
-> Exempel på korrekta ORCID: `0000-0003-3455-0855` eller `0000-0003-5498-659X`
+> Exempel på korrekta ORCID: `0009-0004-3911-2023` eller `0000-0003-5498-659X`
 
 *Ogiltigt KTH-ID*
 

@@ -61,7 +61,7 @@ cr_funders_resolve <- function(x) {
   return (res)
 }
 
-cr_GET <- function(route = "https://api.crossref.org/funders", filter, rows = 1000, offset = 0, timeout = 30L) {
+cr_funders_GET <- function(route = "https://api.crossref.org/funders", filter, rows = 1000, offset = 0, timeout = 30L) {
 
   # https://api.crossref.org/swagger-ui/index.html#/Funders/get_funders
   ua <- "httr (https://github.com/KTH-Library/kthcorpus/; mailto:biblioteket@kth.se)"
@@ -121,14 +121,14 @@ cr_GET <- function(route = "https://api.crossref.org/funders", filter, rows = 10
 cr_funders <- function(location = "Sweden") {
 
   location <- URLencode(glue::glue("location:{location}"))
-  p0 <- cr_GET(filter = location, rows = 1, offset = 0) |> httr::content()
+  p0 <- cr_funders_GET(filter = location, rows = 1, offset = 0) |> httr::content()
 
   n <- p0$message$`total-results`
   p <- pager(n, page_length = 100)
   message(glue::glue("Found {n} results, fetchning {nrow(p)} pages..."))
 
   resp <- list(offset = p$start, rows = p$count) |> purrr::pmap(
-    .f = function(rows, offset) cr_GET(filter = location, rows = rows, offset = offset),
+    .f = function(rows, offset) cr_funders_GET(filter = location, rows = rows, offset = offset),
     .progress = list(
       show_after = 0.2,
       name = "cr_funders",
@@ -154,4 +154,138 @@ cr_funders <- function(location = "Sweden") {
     unnest_wider(col = "replaced-by", names_sep = "_") |>
     unnest_wider(col = "replaces", names_sep = "_")
 
+}
+
+#' Crossref lookup table for DOI prefixes
+#'
+#' Requests DOI prefixes from Crossref web site and returns as a data frame.
+#' @param doi_prefix the prefix to look up, by default "all"
+#' @return data frame
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  cr_publisher()  # lookup all publishers
+#'  cr_publisher(c("10.4172", "10.4236"))  # lookup given a few doi prefixes
+#'  }
+#' }
+#' @export
+#' @importFrom httr GET content
+#' @importFrom jsonlite fromJSON
+#' @importFrom tibble as_tibble
+#' @importFrom tidyr unnest
+#' @importFrom dplyr arrange rename mutate
+#' @importFrom purrr map_df
+cr_publisher <- function(doi_prefix = "all") {
+
+  memberId <- prefixes <- publisher <- publisher_name <- NULL
+
+  cr_doi_lookup <- function(url)
+    url |> httr::GET()  |> httr::content(as = "text") |>
+    jsonlite::fromJSON() |> tibble::as_tibble()
+
+  if (length(doi_prefix) == 1 && doi_prefix == "all") {
+    all <-
+      paste0("http://doi.crossref.org/getPrefixPublisher/?prefix=", doi_prefix) |>
+      cr_doi_lookup() |>
+      tidyr::unnest(col = "prefixes") |>
+      dplyr::arrange(name) |>
+      dplyr::rename(publisher = name, cr_id = memberId, doi_prefix = prefixes) |>
+      dplyr::mutate(publisher = html_unescape(publisher))
+    return (all)
+  }
+
+  # vectorized calls for all give prefixes
+  urls <-
+    "http://doi.crossref.org/getPrefixPublisher/?prefix=%s" |>
+    sprintf(doi_prefix)
+
+  urls |> purrr::map_df(cr_doi_lookup, .progress = TRUE) |>
+    dplyr::mutate(publisher_name = html_unescape(publisher_name))
+}
+
+html_unescape <- function(x) {
+  html <- paste0("<x>", paste0(x, collapse = "#_|"), "</x>")
+  parsed <- xml2::xml_text(xml2::read_html(html))
+  strsplit(parsed, "#_|", fixed = TRUE)[[1]]
+}
+
+#' Crossref assertions associated with a DOI
+#'
+#' For some DOIs, information like the conference_url can be
+#' retrieved.
+#' @param doi character the DOI to look up information for
+#' @return data frame with assertions data for the DOI
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  # some DOIs do not have assertions...
+#'  # "10.1145/263699"  |>
+#'  "10.1007/978-3-031-26387-3_24" |>
+#'   cr_work_assertions() |>
+#'   select(c("doi", starts_with("conference")) |>
+#'   glimpse()
+#'  }
+#' }
+#' @export
+cr_work_assertions <- function(doi) {
+  cr_work_GET(doi) |> parse_cr_assertion(doi)
+}
+
+#' @importFrom tibble add_column
+parse_cr_assertion <- function(assertion, doi) {
+  node <- "assertion"
+  assertion |> enframe() |> filter(name == "message") |>
+    unnest_wider("value") |>
+    select(all_of(node)) |>
+    unnest(node) |>
+    unnest_wider(node) |>
+    select(all_of(c("name", "value"))) |>
+    pivot_wider() |>
+    add_column(doi = doi, .before = 1)
+}
+
+#' @importFrom httr GET content
+cr_work_GET <- function(doi) {
+  sprintf("https://api.crossref.org/works/%s",
+      doi
+    ) |>
+    httr::GET() |> httr::content()
+}
+
+#' Crossref information about conferences, given a DOI
+#'
+#' Crossref Works API provides information about conference proceedings
+#' for some DOIs.
+#' @param doi character the DOI to look up information for
+#' @return  data frame with conference information
+#' @details For more information, see \url{# https://www.crossref.org/documentation/schema-library/markup-guide-record-types/conference-proceedings/}
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  cr_work_confinfo("10.1145/263699") |> glimpse()
+#'  }
+#' }
+#' @export
+cr_work_confinfo <- function(doi) {
+  cr_work_GET(doi) |> parse_cr_confinfo()
+}
+
+#' @importFrom dplyr rename_with filter
+#' @importFrom tidyr unnest unnest_wider
+parse_cr_confinfo <- function(event) {
+
+  node <- "event"
+
+  event |> enframe() |> filter(name == "message") |>
+    unnest_wider(col = "value") |>
+    select(all_of(node)) |> unnest_wider(col = node) |>
+    unnest_wider("start", simplify = list(`date-parts` = FALSE), names_sep = "_") |>
+    unnest_wider("end", simplify = list(`date-parts` = FALSE), names_sep = "_") |>
+    unnest_wider("start_date-parts", names_sep = "_") |>
+    unnest_wider("end_date-parts", names_sep = "_") |>
+    unnest_wider("start_date-parts_1", names_sep = "_") |>
+    unnest_wider("end_date-parts_1", names_sep = "_") |>
+    unnest_wider("sponsor", names_sep = "_") |>
+    rename_with(.fn = function(x) gsub("_date-parts_1", "_date", x))
 }

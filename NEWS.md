@@ -1,5 +1,12 @@
 # kthcorpus
 
+## kthcorpus 0.3.2
+
+* add fcns for guessing author identifiers when importing MODS to DiVA
+* add fcns for getting conference info from Scopus and using it in MODS generation
+* various minor fixes
+* change checks report to include non quality controlled items (fresh/old)
+
 ## kthcorpus 0.3.1
 
 * add fcn for retrieving and uploading project data to object storage

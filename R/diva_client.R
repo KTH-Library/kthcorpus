@@ -280,9 +280,10 @@ kth_diva_pubs <- function(use_cache = TRUE, refresh_cache = FALSE) {
   data <-
     readr::read_csv(diva_tmp("pub.csv"), col_types = ct)
 
-  data <-
-    data %>%
-    filter(grepl("QC", Notes))
+# NB: Disabled in order to catch more multiplettes 2023-06-12
+#  data <-
+#    data %>%
+#    filter(grepl("QC", Notes))
 
   if (use_cache) readr::write_rds(data, tmp)
 
@@ -461,6 +462,7 @@ diva_url <- function(
   variant = c("pub", "aut"), portal = diva_config()$portal) {
 
   pubtypes <- function() {
+    # excludes dissertations, theses and licentiate theses
     c(
       "bookReview", "review", "article",
       "artisticOutput", "book", "chapter",
@@ -480,7 +482,8 @@ diva_url <- function(
 
     # remove the organisationId slot if required
     if (!use_orgid) {
-      params[[1]][[2]]$organisationId <- NULL
+      params[[1]][[2]] <- NULL
+#      params[[1]][[2]]$organisationId <- NULL
       #params[[1]][[2]]$`organisationId-Xtra` <- NULL
       #params[[1]] <- NULL
     }
@@ -499,7 +502,7 @@ diva_url <- function(
       addFilename = "true",
       aq = I("[[]]"),
       aqe = I("[]"),
-      aq2 = I(queryparam_aq2(use_orgid = TRUE)),  # since FALSE times out (> 5 min dl)
+      aq2 = I(queryparam_aq2(use_orgid = FALSE)),  # since FALSE times out (> 5 min dl)
       onlyFullText = "false",
       noOfRows = as.character(5e6L),
       sortOrder = "title_sort_asc",
@@ -514,7 +517,7 @@ diva_url <- function(
       addFilename = "true",
       aq = I("[[]]"),
       aqe = I("[]"),
-      aq2 = I(queryparam_aq2()),
+      aq2 = I(queryparam_aq2(use_orgid = FALSE)),
       onlyFullText = "false",
       noOfRows = as.character(5e6L),
       sortOrder = "title_sort_asc",

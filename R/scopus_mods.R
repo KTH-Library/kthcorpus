@@ -37,15 +37,19 @@ scopus_extent_from_pagerange <- function(x) {
 #' @param kthid_orcid_lookup a lookuptable of orcids with a known kthid associated from kthid_orcid() fcn
 #' @return an object with parameters which can be used to generate MODS with the
 #' create_diva_mods() function
+#' @importFrom utils tail
 #' @export
 scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) {
 
   `dc:identifier` <- `dc:description` <-
     `given-name` <- surname <- authid <- auid <-
     ce_surname <- ce_given_name <-
+    preferred_name_ce_given_name <- preferred_name_ce_surname <-
     raw_org <- afid <-
     eng_code <- swe_code <- value <-
-    term <- sn <- rowid <- score <- enrich <- NULL
+    term <- sn <- rowid <- score <- enrich <- enrich_orcid <- NULL
+
+  #sid <- "SCOPUS_ID:85136096142"
 
   # use info primarily from scopus Search API
   p <- scopus$publications |> filter(grepl(sid, `dc:identifier`))
@@ -68,9 +72,6 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
   cor <- sae$scopus_correspondence
   ags <- sae$scopus_authorgroup |> mutate(seq = as.integer(seq)) |> arrange(-desc(seq))
 
-  # TODO: map scopus publication type to DiVA MODS
-
-  #genres <- frag_genre(tolower(p$subtypeDescription))
   genres <- frag_genre2(p$`prism:aggregationType`, p$subtypeDescription)
   genre <- names(genres)
 
@@ -83,6 +84,28 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     frag_identifier(type = "issn", identifier = p$`prism:issn`),
     frag_identifier(type = "articleId", identifier = p$`article-number`)
   )
+
+  # TODO: fix parsing of `prism:isbn` "dictionary", esp "" should be NA
+
+  isbn_identifiers <-
+    as.character(p$`prism:isbn`) |> strsplit(split = " ") |> unlist() |>
+    map_chr(function(x) frag_identifier(type = "isbn", displayLabel = "Undefined", identifier = x))
+
+  notes <- c(
+    frag_note(sprintf("QC %s \nImported from Scopus. VERIFY.\n", format(Sys.Date(), "%Y%m%d")))#,
+    #frag_note("Another. @Funder@ [@project_number_from_funder@")
+  )
+
+  if (! genre %in% c("chapter", "conferencePaperPublished", "articleConferencePaper")) {
+    identifiers <- c(identifiers, isbn_identifiers)
+  } else {
+    # TODO: isbn info should be used in Notes (Anders) for chapter and conferencePaperPublished
+    # and articleConferencePaper
+    # "partOf isbn"
+    notes <- c(notes,
+      frag_note(sprintf("Part of ISBN %s", p$`prism:isbn`))
+    )
+  }
 
   guess_kthid <- function(my_orcid) {
     if (length(my_orcid) > 1 || is.na(my_orcid)) return (NA_character_)
@@ -109,18 +132,29 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
   if (!"raw_org" %in% names(ags))
     ags$raw_org <- ags$ce_text
 
-  # TODO: if raw org is KTH then prefigate surname w "$$$"
   # TODO: if unique match then "£££[score=]" (surname) - but populate w more info
-  # TODO: sort scopus records - 1. those who have DOI and/or ScopusID in DiVA
-  # 2. for the others, group in three MODSCollections a) Articles b) CP c) residual
-  # TODO: extract conf name and title for proceedings -
+  # NB: it seems the scopus search api restricts the number of authors to 100
+  # but only there do we get the orcid (?)
 
-  authors <-
-    aut |>
+  sae_n_authors <-
+    sae$scopus_authors |> select(-c("id", "i")) |> distinct() |> nrow()
+
+  notes <-
+    c(notes, glue::glue('<note type="creatorCount">{sae_n_authors}</note>',
+      .na = ""))
+
+  #TODO: to get orcid for sae_authors, join for at most 100 of those?
+
+#  scopus_orcids <-
+
+  sae_authors <- sae$scopus_authors
+
+  authorz <-
+    sae_authors |>
       group_by(auid) |>
-      distinct(orcid, surname, `given-name`, surname) |>
+      distinct(preferred_name_ce_surname, preferred_name_ce_given_name) |>
       ungroup() |>
-      left_join(by = "auid",
+      left_join(by = "auid", relationship = "many-to-many",
         ags |> select(seq, raw_org, seq, auid) |>
         group_by(seq) |>
         summarize(across(where(is.character), function(x) {
@@ -130,16 +164,50 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
         )) |> ungroup()
       ) |>
     select(-auid) |>
-    tibble::rowid_to_column()
+    tibble::rowid_to_column() |>
+    mutate(orcid = NA) |>
+    rename(
+      surname = preferred_name_ce_surname,
+      `given-name` = preferred_name_ce_given_name
+    ) |>
+    arrange(as.integer(seq))
 
+  # authors <-
+  #   aut |>
+  #     group_by(auid) |>
+  #     distinct(orcid, surname, `given-name`, surname) |>
+  #     ungroup() |>
+  #     left_join(by = "auid",
+  #       ags |> select(seq, raw_org, seq, auid) |>
+  #       group_by(seq) |>
+  #       summarize(across(where(is.character), function(x) {
+  #           res <- paste0(collapse = "; ", unique(na.omit(x)))
+  #           ifelse(all(res == ""), NA_character_, res)
+  #         }
+  #       )) |> ungroup()
+  #     ) |>
+  #   select(-auid) |>
+  #   tibble::rowid_to_column()
+
+  # TODO: for many scopusids, get the raw_org... find all with afid for KTH
+  # run the re_kth - does it match for all those records.
   re_kth <- paste0(
-    "kth|KTH|roy.*?inst.*?tech.*?|Roy\\. Inst\\. T|alfven|",
-    "kung.*?tek.*?hog|kgl.*?tek.*?|kung.*?tek.*?hg.*?|roy.*?tech.*?univ.*?"
+    "kth|roy.*?inst.*?tech.*?|roy\\. inst\\. t|alfven|",
+    "kung.*?tek.*?h[o\u00f6]g.*?|kgl.*?tek.*?|kung.*?tek.*?hg.*?|roy.*?tech.*?univ.*?"
   )
 
-  suggestions <-
-    authors |> filter(grepl(re_kth, raw_org)) |> rowwise() |>
+  my_authorz <- authorz
+
+  authors_kth <- my_authorz |> filter(grepl(re_kth, tolower(raw_org))) |> rowwise() |>
     mutate(term = glue::glue(.na = "", .sep = " ", orcid, `given-name`, surname))
+
+  if (sae_n_authors >= 30) {
+    author_first <- my_authorz |> head(1)
+    author_last <- my_authorz |> tail(1)
+    my_authorz <- bind_rows(author_first, authors_kth, author_last)
+  }
+
+  suggestions <- authors_kth
 
   if (nrow(suggestions) > 0) {
     suggestions <-
@@ -155,17 +223,19 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
         )) |>
       unnest(enrich, names_sep = "_") |>
       select("rowid", starts_with("enrich")) |>
-      mutate(across(where(is.character), function(x) na_if(x, "")))
-    } else {
-      suggestions <-
-        data.frame() |> as_tibble() |>
-        mutate(rowid = NA, enrich_kthid = NA, enrich_orcid = NA)
+      mutate(across(where(is.character), function(x) na_if(x, ""))) |>
+      rowwise() |>
+      mutate(enrich_orcid = strsplit(enrich_orcid, "\\s+") |> unlist() |> toupper() |> unique() |>  paste(collapse = " "))
+  } else {
+    suggestions <-
+      data.frame() |> as_tibble() |>
+      mutate(rowid = NA, enrich_kthid = NA, enrich_orcid = NA)
   }
 
   enriched <-
-    authors |> left_join(suggestions, by = "rowid") |>
+    my_authorz |> left_join(suggestions, by = "rowid") |>
     #filter(!is.na(enrich_kthid))
-    mutate(surname = ifelse(grepl("KTH", raw_org), paste0("$$$", surname), surname))
+    mutate(surname = ifelse(grepl(re_kth, tolower(raw_org)), paste0("$$$", surname), surname))
 
   persons <-
     # use "given-name" and "surname" from search API (aff)
@@ -180,8 +250,11 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
         given = `given-name`,
         role = ifelse(seq == 1 , "aut", "aut"),
         affiliations = raw_org |> tidy_xml(cdata = TRUE),
-        descriptions = if (all(is.na(orcid), is.na(enrich_orcid))) NULL else paste0("orcid.org=", enrich_orcid))
+        # give orcid precendence over enrich_orcid if both exist
+        descriptions = if (all(is.na(orcid), is.na(enrich_orcid))) NULL else paste0("orcid.org=", ifelse(is.na(orcid), enrich_orcid, orcid)))
     })
+
+
 
   # TODO: Can the publication status be picked up from Scopus?
   # One of Submitted / Accepted / In press / Published
@@ -191,7 +264,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
 
   ext <- p$`prism:pageRange` |> scopus_extent_from_pagerange()
 
-  related_item <- frag_relatedItem_host_journal(
+  related_item_journal <- frag_relatedItem_host_journal(
     pub_title = p$`prism:publicationName`,
     pub_issn = p$`prism:issn`,
     pub_eissn = p$`prism:eIssn`,
@@ -201,10 +274,23 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     pub_extent_end = ext["extent_end"]
   )
 
-  # relateditems <-
+  related_item_conf <- sae$scopus_confinfo |> pmap(frag_relatedItem_conference)
+
+  if (genre %in% c("conferencePaperPublished", "articleConferencePaper", "conferenceProceedings")) {
+    related_items <- related_item_conf
+    # TODO FIXME: Special case introduced for "Conference Proceeding" / "Book Chapter"
+    if (length(related_item_conf) == 0)
+      related_items <- related_item_journal
+  } else {
+    related_items <- related_item_journal
+  }
+
+  # related_item_series <-
   #   frag_relatedItem_series(
-  #     title = p$`prism:publicationName`, eissn = p$`prism:eIssn`,
-  #     issn = p$`prism:eIssn`, issue = p$`prism:issueIdentifier`
+  #     title = p$`prism:publicationName`,
+  #     eissn = p$`prism:eIssn`,
+  #     issn = p$`prism:issn`,
+  #     issue = p$`prism:issueIdentifier`
   #   )
 
   title <- frag_titleInfo(
@@ -212,7 +298,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     lang = "eng")
 
   origins <- frag_originInfo(
-    publisher = sae$scopus_abstract$`dc:publisher`,
+    publisher = sae$scopus_abstract$`dc:publisher` |> tidy_xml(),
     yearIssued = lubridate::year(p$`prism:coverDate`),
     availableFrom = p$`prism:coverDisplayDate`
   )
@@ -221,19 +307,16 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
 
   resourcetypes <- frag_typeOfResource(resourcetype = "text")
 
-  notes <- c(
-    frag_note("Imported from Scopus. VERIFY.")#,
-    #frag_note("Another. @Funder@ [@project_number_from_funder@")
-  )
-
   abstract <- frag_abstract(p$`dc:description` |> tidy_xml(cdata = TRUE))
 
-  # both author keywords and UKÄ classifications are MODS "subjects"
+  # both author keywords and classifications are MODS "subjects"
   keywords <-
     p$authkeywords |>
     gsub(pattern = " [|] ", replacement = ", ") |>
     strsplit(", ") |>
     unlist()
+
+  if (all(is.na(keywords))) keywords <- NULL
 
   hsv_call <-
     classify_swepub(
@@ -260,8 +343,8 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
 
   subjects <- c(frag_subject(topic = keywords), hsv_categories)
 
-  # TODO: how should this be used?
-  location <- frag_location(p$`prism:url`)
+  # TODO: how should this be used? Remove it for now.
+  location <- NULL #frag_location(p$`prism:url`)
 
   #series <- frag_relatedItem_series(title = "relseries",
   #  issn = "my_issn", eissn = "my_eissn", issue = "1")
@@ -273,7 +356,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     , identifiers = identifiers
     , persons = persons
     , subjects = subjects
-    , relateditems = related_item
+    , relateditems = related_items
     , title = title
     , abstract = abstract
     , notes = notes
@@ -281,7 +364,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     , resourcetypes = resourcetypes
     , desc = desc
     , location = location
-    #  , series =
+    #, series = related_item_series
   )
 
   dmp

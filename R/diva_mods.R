@@ -548,9 +548,9 @@ kth_genre <- function() {
     genre |> as.vector()
 }
 
-frag_genre2 <- function(aggregationType, subtypeDescription) {
+genre_scopus_diva <- function() {
 
-  `prism:aggregationType` <- subtype <- NULL
+  #TODO: add Conference Proceeding\tBook Chapter\t????
 
   combos <- "prism:aggregationType	subtype	key
 Journal	Article	article
@@ -561,9 +561,9 @@ Journal	Conference Paper	articleConferencePaper
 Book Series	Book Chapter	chapter
 Book Series\tEditorial\tchapter
 Conference Proceeding	Editorial	conferenceProceedings
-Journal	Note	articleErratum
+Journal	Note	article
 Book	Book	book
-Book	Editorial	collection
+Book	Editorial	chapter
 Journal	Editorial	editorialMaterial
 Journal	Letter	articleLetter
 Trade Journal	Article	articleOther
@@ -571,7 +571,19 @@ Book Series\tConference Paper\tconferencePaperPublished
 Journal\tData Paper\tarticle
 Journal\tErratum\tarticleErratum
 Journal\tShort Survey\tarticle
+Conference Proceeding\tBook Chapter\tconferencePaperPublished
+Book Series\tNote\tchapter
 " |> readr::read_tsv(show_col_types = FALSE)
+
+  return (combos)
+
+}
+
+frag_genre2 <- function(aggregationType, subtypeDescription) {
+
+  `prism:aggregationType` <- subtype <- NULL
+
+  combos <- genre_scopus_diva()
 
   key <-
     combos |>
@@ -746,10 +758,7 @@ frag_subject <- function(lang = "eng", source, href, topic, genre) {
 
   topix <- paste0(collapse = "\n", sprintf("  <topic>%s</topic>", topic))
 
-  glue::glue(paste0(footer, '>
-    {topix}',
-    infix, '
-    </subject>'))
+  glue::glue(paste0(footer, '>{topix}', infix, '</subject>'))
 }
 
 frag_physicalDescription <- function(desc = "text") {
@@ -773,8 +782,12 @@ frag_abstract <- function(abstract, lang = "eng") {
   glue::glue('<abstract lang="{lang}">{abstract}</abstract>')
 }
 
+# conf_title <-> "sourcetitle"  #
+# conf_ext_start <-> abstract[["abstracts-retrieval-response"]][["coredata"]][["prism:startingPage"]]
+# conf_ext_end <-> abstract[["abstracts-retrieval-response"]][["coredata"]][["prism:endingPage"]]
+# conf_details <-> "" # composite of confname, location and duration
 frag_relatedItem_conference <- function(conf_title, conf_subtitle, conf_ext_start, conf_ext_end, conf_details) {
-  glue::glue('<relatedItem type="host">
+  glue::glue(.na = "", '<relatedItem type="host">
       <titleInfo>
         <title>{conf_title}</title>
         <subTitle>{conf_subtitle}</subTitle>
@@ -876,7 +889,7 @@ frag_relatedItem_host_book <- function(
 
 frag_keyword <- function(keywords) {
   kw <- strsplit(keywords, "\\W+") %>% unlist()
-  ks <- function(x) glue::glue('<subject lang=" eng ">
+  ks <- function(x) glue::glue(.na = "", '<subject lang="eng">
     <topic>{x}</topic>
   </subject>')
   kw %>% map_chr(ks) %>% paste0(collapse = "\n")

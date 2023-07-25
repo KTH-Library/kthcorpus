@@ -52,7 +52,7 @@ search_names <- function(term) {
 
   rowid <- score <- NULL
 
-  con <- con_search(db_loc = "/tmp/search.db")
+  con <- con_search(db_loc = file.path(rappdirs::app_dir("kthcorpus")$config(), "search.db"))
   on.exit(DBI::dbDisconnect(con))
 
   colz <- con |> DBI::dbListFields("fts") |> paste0(collapse = ", ")

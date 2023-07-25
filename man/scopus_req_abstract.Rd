@@ -6,13 +6,16 @@
 \usage{
 scopus_req_abstract(
   sid,
-  endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
+  endpoint = "https://api.elsevier.com/content/abstract/scopus_id/",
+  timeout = 10L
 )
 }
 \arguments{
 \item{sid}{ScopusID}
 
 \item{endpoint}{the endpoint to use for the request (default value provided)}
+
+\item{timeout}{the timeout before the request fails, by default 10L}
 }
 \description{
 Fetch abstract given Scopus ID
