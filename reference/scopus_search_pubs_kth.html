@@ -57,7 +57,12 @@ previous two weeks is used.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">scopus_search_pubs_kth</span><span class="op">(</span><span class="va">beg_loaddate</span>, <span class="va">end_loaddate</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">scopus_search_pubs_kth</span><span class="op">(</span></span>
+<span>  <span class="va">beg_loaddate</span>,</span>
+<span>  <span class="va">end_loaddate</span>,</span>
+<span>  include_early_access <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">beg_pubyear</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -68,6 +73,15 @@ previous two weeks is used.</p>
 
 <dt>end_loaddate</dt>
 <dd><p>date expressed as "yyyymmdd", by default current date</p></dd>
+
+
+<dt>include_early_access</dt>
+<dd><p>logical, by default FALSE</p></dd>
+
+
+<dt>beg_pubyear</dt>
+<dd><p>optional parameter to restrict criteria to include records after
+a specific publication year</p></dd>
 
 </dl></div>
     <div id="details">
