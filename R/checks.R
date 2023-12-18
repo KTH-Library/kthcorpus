@@ -420,6 +420,7 @@ check_multiplettes_title <- function(pubs = kth_diva_pubs(), aut = kth_diva_auth
   # NOTE: using non ascii characters here -> stringi::stri_escape_unicode can help!
   exceptions <- trimws(readr::read_lines(
     "Background
+    Chairs'' [Ww]elcome
     Commentary
     Conclusions
     Conclusion
