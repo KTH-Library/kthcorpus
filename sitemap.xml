@@ -241,6 +241,12 @@
     <loc>/reference/vat_resolve_vies.html</loc>
   </url>
   <url>
+    <loc>/reference/wos_read_tsv.html</loc>
+  </url>
+  <url>
+    <loc>/reference/wos_tag_fields.html</loc>
+  </url>
+  <url>
     <loc>/reference/write_mods_chunked.html</loc>
   </url>
   <url>
