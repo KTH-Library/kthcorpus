@@ -18,7 +18,7 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
     filter(date == filedate) |>
     pull(Key)
 
-  if(length(todayfile) != 1) {
+  if(length(filename) != 1) {
     stop("No or more than one HR file(s) with date ", filedate, " in ", bucket)
   }
 
