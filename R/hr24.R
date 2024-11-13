@@ -49,5 +49,3 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
            plainname = paste(firstname, lastname),
            username = gsub("@.*$", "", email))
 }
-
-
