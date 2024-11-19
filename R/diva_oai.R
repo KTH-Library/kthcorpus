@@ -107,6 +107,8 @@ oai_db_lastmod <- function(con) {
 #' @importFrom dbplyr dbplyr_edition
 oai_changes <- function(con, append = FALSE, since = oai_db_lastmod()) {
 
+  identifier <- datestamp <- NULL
+
   if (missing(con)) {
     con <- oai_con()
     on.exit({
@@ -126,7 +128,13 @@ oai_changes <- function(con, append = FALSE, since = oai_db_lastmod()) {
     con |> dplyr::tbl("ids") |> dplyr::collect() |> 
     readr::type_convert() |> suppressMessages()
 
-  new_ids <- dplyr::anti_join(ids, ids_old)
+  ids_diff <- dplyr::anti_join(ids, ids_old)
+
+  new_ids <- 
+    ids_diff |> 
+    dplyr::group_by(identifier) |> 
+    dplyr::filter(datestamp == max(datestamp)) |> 
+    dplyr::ungroup()
 
   print(new_ids)
 

@@ -126,3 +126,16 @@ NULL
 #'}
 #' @details DETAILS
 "wos_tag_fields"
+
+#' @title HR24 (Visma) lookup table
+#' @description A lookup table for employee codes and corresponding employee descriptions
+#' and titles
+#' @format A data frame with 65 rows and 4 variables:
+#' \describe{
+#'   \item{\code{emp_code}}{character the 5-digit employee code}
+#'   \item{\code{emp_desc}}{character role description in Swedish}
+#'   \item{\code{title_sv}}{character title in Swedish}
+#'   \item{\code{title_en}}{character title in English} 
+#'}
+#' @details DETAILS
+"hr24_employment_title"
