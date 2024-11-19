@@ -130,10 +130,10 @@ oai_changes <- function(con, append = FALSE, since = oai_db_lastmod()) {
 
   new_ids <- 
     ids_diff |> 
-    group_by(identifier) |> 
-    filter(datestamp == max(datestamp)) |> 
-    ungroup()
-  
+    dplyr::group_by(identifier) |> 
+    dplyr::filter(datestamp == max(datestamp)) |> 
+    dplyr::ungroup()
+
   print(new_ids)
 
   if (isTRUE(append)) {
