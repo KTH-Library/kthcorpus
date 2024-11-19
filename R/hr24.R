@@ -33,12 +33,12 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
                  "emp_degree", "emp_title_swe", "scb_topic", "school_name", "person_status")
 
   school_abbr <- data.frame(unit_school = c("ABE", "CBH", "EECS", "ITM", "SCI", "VS"),
-                            school_name = c("Skolan för arkitektur och samhällsbyggnad",
-                                            "Skolan för kemi, biologi och hälsa",
-                                            "Skolan för elektronik och datavetenskap",
-                                            "Skolan för industriell teknik och management",
-                                            "Skolan för teknikvetenskap",
-                                            "Verksamhetsstöd"))
+                            school_name = c("Skolan f\u00f6r arkitektur och samh\u00e4llsbyggnad",
+                                            "Skolan f\u00f6r kemi, biologi och h\u00e4lsa",
+                                            "Skolan f\u00f6r elektronik och datavetenskap",
+                                            "Skolan f\u00f6r industriell teknik och management",
+                                            "Skolan f\u00f6r teknikvetenskap",
+                                            "Verksamhetsst\u00f6d"))
 
   hr |>
     left_join(school_abbr, by = "school_name") |>

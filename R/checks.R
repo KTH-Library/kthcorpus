@@ -651,7 +651,7 @@ check_invalid_DOI <- function(pubs = kth_diva_pubs()) {
 
 check_multiplettes_DOI <- function(pubs = kth_diva_pubs()) {
 
-  ScopusId <- Year <- DOI_link <- Scopus_link <- n_pids <- LastUpdated <- NULL
+  ScopusId <- Year <- DOI_link <- Scopus_link <- n_pids <- LastUpdated <- doi <- NULL
 
   pubs |>
     select(PID, DOI) |>
