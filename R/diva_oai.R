@@ -126,8 +126,14 @@ oai_changes <- function(con, append = FALSE, since = oai_db_lastmod()) {
     con |> dplyr::tbl("ids") |> dplyr::collect() |> 
     readr::type_convert() |> suppressMessages()
 
-  new_ids <- dplyr::anti_join(ids, ids_old)
+  ids_diff <- dplyr::anti_join(ids, ids_old)
 
+  new_ids <- 
+    ids_diff |> 
+    group_by(identifier) |> 
+    filter(datestamp == max(datestamp)) |> 
+    ungroup()
+  
   print(new_ids)
 
   if (isTRUE(append)) {
