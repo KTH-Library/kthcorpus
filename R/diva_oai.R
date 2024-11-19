@@ -107,6 +107,8 @@ oai_db_lastmod <- function(con) {
 #' @importFrom dbplyr dbplyr_edition
 oai_changes <- function(con, append = FALSE, since = oai_db_lastmod()) {
 
+  identifier <- datestamp <- NULL
+
   if (missing(con)) {
     con <- oai_con()
     on.exit({

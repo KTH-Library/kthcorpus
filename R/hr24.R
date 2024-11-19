@@ -3,9 +3,11 @@
 #' @param bucket The bucket to look in for the file, default hr24
 #' @param filedate an optional date to look for, default Sys.Date
 #' @import stringr lubridate aws.s3 dplyr
+#' @importFrom utils read.csv
 #' @export
-
 fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
+
+  lastname <- firstname <- email <- NULL
 
   if(!is.Date(filedate))
     stop("Please use a filedate of format YYYY-MM-DD")
@@ -24,7 +26,7 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
   message("Reading ", filename, " from ", bucket)
 
-  hr <- s3read_using(read.csv, sep = ";", header = FALSE, fileEncoding = "UTF-8-BOM", object = filename, bucket = bucket)
+  hr <- s3read_using(utils::read.csv, sep = ";", header = FALSE, fileEncoding = "UTF-8-BOM", object = filename, bucket = bucket)
 
   names(hr) <- c("kthid", "yob", "unit_abbr", "unit_name", "lastname", "firstname", "email",
                  "gender", "emp_code", "emp_desc", "emp_nr", "emp_lastmod", "emp_beg", "emp_end",
