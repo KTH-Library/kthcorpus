@@ -28,7 +28,7 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
   names(hr) <- c("kthid", "yob", "unit_abbr", "unit_name", "lastname", "firstname", "email",
                  "gender", "emp_code", "emp_desc", "emp_nr", "emp_lastmod", "emp_beg", "emp_end",
-                 "emp_degree", "emp_title_swe", "scb_topic", "school_name", "person_status")
+                 "emp_degree", "emp_title_swe", "scb_topic", "school_name")
 
   school_abbr <- data.frame(unit_school = c("ABE", "CBH", "EECS", "ITM", "SCI", "VS"),
                             school_name = c("Skolan för arkitektur och samhällsbyggnad",
