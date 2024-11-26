@@ -26,13 +26,19 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
   message("Reading ", filename, " from ", bucket)
 
-  hr <- s3read_using(utils::read.csv, sep = ";", header = FALSE, fileEncoding = "UTF-8-BOM", object = filename, bucket = bucket)
+  hr <- s3read_using(utils::read.csv, sep = ";", fileEncoding = "UTF-8-BOM", object = filename, bucket = bucket)
 
-  names(hr) <- c("kthid", "yob", "unit_abbr", "unit_name", "lastname", "firstname", "email",
-                 "gender", "emp_code", "emp_desc", "emp_nr", "emp_lastmod", "emp_beg", "emp_end",
-                 "emp_degree", "emp_title_swe", "scb_topic", "school_name")
-  # lost from files from HR:
-  # "person_status" (previously field #19)
+  cols <- data.frame(
+    oldname = c("KTHID", "FÖDELSEÅR", "ORG_NR", "ORG_NAMN", "EFTERNAMN", "FÖRNAMN", "KTH_EMAIL", "MAN.KVINNA",
+                "TJ_BEN_KOD", "TJ_BEN_TEXT", "BEF_NR", "BEF_FROM", "DATUM_NUV_BEF", "BEF_TOM", "SYSS_GRAD",
+                "ÄMNESKOD", "FUNKTION_SV", "SKOLA"),
+    newname = c("kthid", "yob", "unit_abbr", "unit_name", "lastname", "firstname", "email", "gender",
+                "emp_code", "emp_desc", "emp_nr", "emp_first_beg", "emp_beg", "emp_end", "emp_degree",
+                "scb_topic", "emp_title_swe", "school_name"))
+
+  namediff <- setdiff(names(hr), cols$oldname)
+  if(length(namediff) > 1)
+    warning("There are unknown new fields in HR24 data: ", paste(namediff, collapse = ", "))
 
   school_abbr <- data.frame(unit_school = c("ABE", "CBH", "EECS", "ITM", "SCI", "VS"),
                             school_name = c("Skolan f\u00f6r arkitektur och samh\u00e4llsbyggnad",
@@ -43,9 +49,10 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
                                             "Verksamhetsst\u00f6d"))
 
   hr |>
+    rename_with(.fn = \(x) cols |> filter(oldname == x) |> pull(newname), .cols = cols$oldname) |>
     left_join(school_abbr, by = "school_name") |>
     mutate(emp_beg = as_date(emp_beg, format = "%m/%d/%Y"),
-           emp_lastmod = as_date(emp_lastmod, format = "%m/%d/%Y"),
+           emp_first_beg = as_date(emp_first_beg, format = "%m/%d/%Y"),
            emp_end = if_else(emp_end == '', as_date('2999-12-31'), as_date(emp_end, format = "%m/%d/%Y")),
            lastname = trimws(str_remove(lastname, "D\u00F6dsbo")),
            firstname = trimws(firstname),
