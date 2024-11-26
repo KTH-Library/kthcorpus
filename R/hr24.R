@@ -51,9 +51,9 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
   hr |>
     rename_with(.fn = \(x) cols |> filter(oldname == x) |> pull(newname), .cols = cols$oldname) |>
     left_join(school_abbr, by = "school_name") |>
-    mutate(emp_beg = as_date(emp_beg, format = "%m/%d/%Y"),
-           emp_first_beg = as_date(emp_first_beg, format = "%m/%d/%Y"),
-           emp_end = if_else(emp_end == '', as_date('2999-12-31'), as_date(emp_end, format = "%m/%d/%Y")),
+    mutate(emp_beg = as_date(emp_beg),
+           emp_first_beg = as_date(emp_first_beg),
+           emp_end = if_else(emp_end == '', as_date('2999-12-31'), as_date(emp_end)),
            lastname = trimws(str_remove(lastname, "D\u00F6dsbo")),
            firstname = trimws(firstname),
            fullname = paste0(lastname,", ", firstname),
