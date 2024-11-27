@@ -19,7 +19,7 @@ test_that("changes since latest timestamp from database can be retrieved", {
 
   skip_on_ci()
 
-  changes <- oai_db_refresh()
+  changes <- oai_changes()
   n_rows <- changes |> map_int(nrow)
   
   is_ok <- length(unique(n_rows)) == 1
@@ -93,7 +93,7 @@ test_that("getting ten latest records as tables works", {
     # ]
   
     my_jsons[40] |> fromJSON() |> toJSON(pretty = TRUE)
-    my_list[40] |> 
+    my_list[1:5] |> 
       mods_records_to_tbls()
   }
 
