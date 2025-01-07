@@ -3,11 +3,11 @@
 #' @param bucket The bucket to look in for the file, default hr24
 #' @param filedate an optional date to look for, default Sys.Date
 #' @import stringr lubridate aws.s3 dplyr
-#' @importFrom utils read.csv
+#' @importFrom readr read_csv2
 #' @export
 fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
-  lastname <- firstname <- email <- NULL
+  lastname <- firstname <- email <- oldname <- newname <- emp_first_beg <- NULL
 
   if(!is.Date(filedate))
     stop("Please use a filedate of format YYYY-MM-DD")
@@ -26,14 +26,14 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
   message("Reading ", filename, " from ", bucket)
 
-  hr <- s3read_using(utils::read.csv, sep = ";", fileEncoding = "UTF-8-BOM", object = filename, bucket = bucket)
+  hr <- s3read_using(read_csv2, object = filename, bucket = bucket)
 
 
   cols <- data.frame(
-    oldname = c("KTHID", "F\u00d6DELSE\u00c5R", "ORG_NR", "ORG_NAMN", "EFTERNAMN", "F\u00d6RNAMN", "KTH_EMAIL", "MAN.KVINNA",
+    oldname = c("KTHID", "F\u00d6DELSE\u00c5R", "ORG_NR", "ORG_NAMN", "STATUS", "EFTERNAMN", "F\u00d6RNAMN", "KTH_EMAIL", "MAN/KVINNA",
                 "TJ_BEN_KOD", "TJ_BEN_TEXT", "BEF_NR", "BEF_FROM", "DATUM_NUV_BEF", "BEF_TOM", "SYSS_GRAD",
                 "\u00c4MNESKOD", "FUNKTION_SV", "SKOLA"),
-    newname = c("kthid", "yob", "unit_abbr", "unit_name", "lastname", "firstname", "email", "gender",
+    newname = c("kthid", "yob", "unit_abbr", "unit_name", "unit_status", "lastname", "firstname", "email", "gender",
                 "emp_code", "emp_desc", "emp_nr", "emp_first_beg", "emp_beg", "emp_end", "emp_degree",
                 "scb_topic", "emp_title_swe", "school_name"))
 

@@ -11,6 +11,8 @@ A data frame with 65 rows and 4 variables:
 \item{\code{emp_desc}}{character role description in Swedish}
 \item{\code{title_sv}}{character title in Swedish}
 \item{\code{title_en}}{character title in English}
+\item{\code{cat_desc}}{character category description in Swedish}
+\item{\code{is_uf_ta}}{character notes if role is UF or TA}
 }
 }
 \usage{

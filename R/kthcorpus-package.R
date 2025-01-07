@@ -135,7 +135,9 @@ NULL
 #'   \item{\code{emp_code}}{character the 5-digit employee code}
 #'   \item{\code{emp_desc}}{character role description in Swedish}
 #'   \item{\code{title_sv}}{character title in Swedish}
-#'   \item{\code{title_en}}{character title in English} 
+#'   \item{\code{title_en}}{character title in English}
+#'   \item{\code{cat_desc}}{character category description in Swedish}
+#'   \item{\code{is_uf_ta}}{character notes if role is UF or TA}
 #'}
 #' @details DETAILS
 "hr24_employment_title"
