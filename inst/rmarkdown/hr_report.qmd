@@ -23,11 +23,6 @@ format:
     link-external-icon: true
     link-external-newwindow: true
     page-layout: article
-  pdf:
-    geometry: 
-      - top=30mm
-      - left=30mm
-  docx: default
 editor_options: 
   chunk_output_type: console
 ---
@@ -201,37 +196,42 @@ div.col_wrap div.bslib-column-wrap {
 #| echo: false
 
 
-hrp <- hr_plus()
+#hrp <- hr_plus()
 
-hrp_extra <- function(hrp = hr_plus()) {
+hrp <- fetch_hr24()
+
+hrp_extra <- function(hrp) {
     hrp |>
-    left_join(ss_employment_title, by = c("emp_code" = "id")) |>
+    left_join(hr24_employment_title |> select(-any_of("emp_desc")), by = c("emp_code")) |>
     mutate(is_uf_ta = is_uf_ta == "UF") |>
-    left_join(research_areas, by = c("scb_topic" = "id")) |>
+    left_join(research_areas |> mutate(id = as.numeric(id)), by = c("scb_topic" = "id")) |>
     rename(
       "scb_topic_swe" = "swe",
       "scb_topic_eng" = "eng",
-      "scb_topic_level" = "level"
+      "scb_topic_level" = "level" 
     )
 }
 
-hrpe <- hrp_extra()
+hrpe <- hrp_extra(hrp)
 
 hrp_current <-
   hrpe |>
   filter(emp_beg <= lubridate::today(), emp_end > lubridate::today()) |>
   group_by(kthid) |>
   summarize(
-    across(c("emp_lastmod", "emp_end", "emp_beg"), max)
+    across(c("emp_end", "emp_beg"), max)
   ) |>
-  arrange(desc(emp_lastmod), desc(emp_end), desc(emp_beg)) |>
-  inner_join(hrp) |>
-  unique()
+  arrange(desc(emp_end), desc(emp_beg)) |>
+  inner_join(hrp |> select(-any_of(c("emp_end", "emp_beg"))), by = c("kthid")) |>
+#  filter(kthid == "u1jyqnf5") |> 
+#  View()
+  #count(kthid) |> filter(n > 1) |> ungroup()
+  unique() # ten are not unique
 
 hrp_summary <-
   hrpe |> group_by(kthid) |>
   summarize(
-    elm = max(emp_lastmod),
+#    elm = max(emp_lastmod),
     ebeg = min(emp_beg),
     eend = max(emp_end),
     duration = eend - ebeg,
@@ -239,7 +239,7 @@ hrp_summary <-
     n = length(kthid),
     yob = max(yob)
   ) |>
-  arrange(desc(n), desc(elm))
+  arrange(desc(n))
 
 hrp <-
   hrpe |>
@@ -278,6 +278,23 @@ check_hr_elm <- function(offset = 60) {
   arrange(desc(ttl))
 }
 
+check_hr_endsbeforebeg <- function() {
+  # people that end their employment even before beginning it
+  hrpe |> 
+    filter(emp_end <= emp_beg) |> 
+  select(kthid, emp_end, emp_beg, unit_abbr, lastname, firstname) |> 
+  mutate(duration = emp_beg - emp_end) |> 
+  arrange(desc(duration))
+}
+
+check_missing_kthid <- function() {
+  # people that have no kthid given
+  hrpe |> 
+    filter(is.na(kthid)) |> 
+  select(kthid, username, firstname, lastname, emp_end, emp_beg, unit_abbr) |> 
+  arrange(-desc(lastname))
+}
+
 
 check_hr_topics <- function() {
   ra <- 
@@ -291,6 +308,7 @@ check_hr_topics <- function() {
     left_join(hrp_current, by = "scb_topic") |> 
     select(scb_topic, n, kthid, unit_abbr, unit_name, lastname, firstname)
 }
+
 
 check_hr_fullname <- function() {
   re <- "\\s{2,}|[[:cntrl:]]|.*?\\s+$"
@@ -389,22 +407,22 @@ bs4_card(my_dt2, "Long employments")
 
 ```
 
-## Last modified in the future
+## Ended employment before even starting it
 
-Some employees have last modified dates that are set more than two months into the future. Or with a last modified date set before the employment started.
+Some employees have a date indicating employment was ended before the start date.
 
 :::{.callout-note}
 Note that these entries may be legit, but could also indicate a data quality issue.
 :::
 
 ```{r}
-#| label: fig-future-lastmodified
-#| fig-cap: Employees with last modified date set two months into the future
+#| label: fig-future-btf
+#| fig-cap: Employees with end date before start date for employment
 #| message: false
 #| column: screen-inset-shaded
 
 my_dt3 <- 
-  check_hr_elm() |> 
+  check_hr_endsbeforebeg() |> 
   datatable(
     style = "bootstrap4", # "bootstrap" or "bootstrap4" or "auto" (for bslib)
     class = "table-bordered table-condensed table-sm",
@@ -420,13 +438,13 @@ my_dt3 <-
     selection = "none"
   )
 
-# Available "dom" settings:
-# l - length changing input control
-# f - filtering input
-# t - The table!
-# i - Table information summary
-# p - pagination control
-# r - processing display element
+# # Available "dom" settings:
+# # l - length changing input control
+# # f - filtering input
+# # t - The table!
+# # i - Table information summary
+# # p - pagination control
+# # r - processing display element
 
 bs4_card(my_dt3, "Last modified in the future (or before employment started)")
 
@@ -515,6 +533,49 @@ my_dt5 <-
 # r - processing display element
 
 bs4_card(my_dt5, "Control characters in names")
+
+```
+
+## Missing kthid
+
+Some employees have missing kthid.
+
+:::{.callout-note}
+Note that these entries may be legit, but could also indicate a data quality issue.
+:::
+
+```{r}
+#| label: fig-missing-kthid
+#| fig-cap: Employees with missing kthid
+#| message: false
+#| column: screen-inset-shaded
+
+my_dt6 <- 
+  check_missing_kthid() |> 
+  datatable(
+    style = "bootstrap4", # "bootstrap" or "bootstrap4" or "auto" (for bslib)
+    class = "table-bordered table-condensed table-sm",
+    rownames = FALSE,
+    height = "100%",
+    escape = FALSE,
+    extensions = "RowGroup",
+    options = list(
+#      rowGroup = list(dataSrc = 0),  # if rownames are used, increase index!
+      paging = FALSE,
+      dom = "iftr"  # display number of records at top
+    ),
+    selection = "none"
+  )
+
+# Available "dom" settings:
+# l - length changing input control
+# f - filtering input
+# t - The table!
+# i - Table information summary
+# p - pagination control
+# r - processing display element
+
+bs4_card(my_dt6, "Missing kthid")
 
 ```
 
