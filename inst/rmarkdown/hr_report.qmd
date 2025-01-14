@@ -23,11 +23,6 @@ format:
     link-external-icon: true
     link-external-newwindow: true
     page-layout: article
-  pdf:
-    geometry: 
-      - top=30mm
-      - left=30mm
-  docx: default
 editor_options: 
   chunk_output_type: console
 ---
