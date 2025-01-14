@@ -53,7 +53,7 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
     left_join(school_abbr, by = "school_name") |>
     mutate(emp_beg = as_date(emp_beg),
            emp_first_beg = as_date(emp_first_beg),
-           emp_end = if_else(emp_end == '', as_date('2999-12-31'), as_date(emp_end)),
+           emp_end = if_else(is.na(emp_end), as_date('2999-12-31'), as_date(emp_end)),
            lastname = trimws(str_remove(lastname, "D\u00F6dsbo")),
            firstname = trimws(firstname),
            fullname = paste0(lastname,", ", firstname),
