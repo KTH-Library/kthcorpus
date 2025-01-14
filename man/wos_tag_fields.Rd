@@ -19,7 +19,4 @@ wos_tag_fields
 \description{
 A curated set of WoS tags and suggested field names, explanations.
 }
-\details{
-DETAILS
-}
 \keyword{datasets}

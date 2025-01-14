@@ -124,7 +124,6 @@ NULL
 #'   \item{\code{tag_long}}{character a slightly longer explanation}
 #'   \item{\code{tag_set}}{character the kind of tag, a grouping}
 #'}
-#' @details DETAILS
 "wos_tag_fields"
 
 #' @title HR24 (Visma) lookup table
@@ -139,5 +138,17 @@ NULL
 #'   \item{\code{cat_desc}}{character category description in Swedish}
 #'   \item{\code{is_uf_ta}}{character notes if role is UF or TA}
 #'}
-#' @details DETAILS
 "hr24_employment_title"
+
+#' @title SCB/UKÄ research topics
+#' @description Research topics from UKÄ/SCB, 2025 version
+#' @format A data frame with 345 rows and 6 variables:
+#' \describe{
+#'   \item{\code{id}}{integer An id with 1, 3 or 5 digits}
+#'   \item{\code{Swedish}}{character Swedish name of topic}
+#'   \item{\code{English}}{character English name of topic}
+#'   \item{\code{level}}{integer Level of topic 1-3}
+#'   \item{\code{Swe_comment}}{character Extra information in Swedish if available}
+#'   \item{\code{Eng_comment}}{character Extra information in English if available}
+#'}
+"scb_topics"

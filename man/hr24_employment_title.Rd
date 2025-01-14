@@ -22,7 +22,4 @@ hr24_employment_title
 A lookup table for employee codes and corresponding employee descriptions
 and titles
 }
-\details{
-DETAILS
-}
 \keyword{datasets}
