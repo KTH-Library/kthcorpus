@@ -1,9 +1,7 @@
 ---
-title: "Checks for HR-plus data"
+title: "Checks for HR-data (v8)"
 author:
-  - name: Markus Skyttner
-    orcid: 0000-0002-4649-3651
-    email: markussk@kth.se
+  - name: Bibliometrics Team @ KTH Library
     affiliations:
       - name: KTH Royal Institute of Technology 
         address: Osquars backe 31
