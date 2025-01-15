@@ -204,10 +204,10 @@ hrp_extra <- function(hrp) {
     hrp |>
     left_join(hr24_employment_title |> select(-any_of("emp_desc")), by = c("emp_code")) |>
     mutate(is_uf_ta = is_uf_ta == "UF") |>
-    left_join(research_areas |> mutate(id = as.numeric(id)), by = c("scb_topic" = "id")) |>
+    left_join(scb_topics, by = c("scb_topic" = "id")) |>
     rename(
-      "scb_topic_swe" = "swe",
-      "scb_topic_eng" = "eng",
+      "scb_topic_swe" = "Swedish",
+      "scb_topic_eng" = "English",
       "scb_topic_level" = "level" 
     )
 }
@@ -297,18 +297,14 @@ check_missing_kthid <- function() {
 
 
 check_hr_topics <- function() {
-  ra <- 
-    research_areas |> 
-    mutate(emp_code = id |> as.integer() |> sprintf(fmt = "%05i")) |> 
-    mutate(scb_topic = id)
-  
+  # People with non existing SCB topic codes
   hrp_current |>
-    filter(!scb_topic %in% c(unique(ra$scb_topic), "999"), !is.na(scb_topic)) |> 
-    count(scb_topic) |> 
-    left_join(hrp_current, by = "scb_topic") |> 
+    filter(!scb_topic %in% c(scb_topics$id, "999"), !is.na(scb_topic)) |> 
+    group_by(scb_topic) |>
+    mutate(n = n()) |> 
+    ungroup() |> 
     select(scb_topic, n, kthid, unit_abbr, unit_name, lastname, firstname)
 }
-
 
 check_hr_fullname <- function() {
   re <- "\\s{2,}|[[:cntrl:]]|.*?\\s+$"
