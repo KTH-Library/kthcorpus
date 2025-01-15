@@ -5,7 +5,7 @@
 \alias{ss_employment_title}
 \title{Employment Titles from Statistics Sweden}
 \format{
-A data frame with 7626 rows and 4 variables:
+A data frame with 8234 rows and 4 variables:
 \describe{
 \item{\code{id}}{character code for employment title}
 \item{\code{desc_swe}}{character description in Swedish}
