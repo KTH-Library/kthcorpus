@@ -257,15 +257,19 @@ check_hr_age_deviants <- function(max_age_years = 100) {
   select(kthid, ebeg, yob, duration, ttl, unit_abbr, lastname, firstname)
 }
 
-check_hr_long_end <- function(y_eend_from = 6, y_eend_to = 100) {
+check_hr_long_end <- function(y_eend_from = 6) {
   # employments that last for more than 6 years (PhD-students?)
-  # and less than very many years (employed for life?)
-  hrp_summary |> filter(
-    ttl > lubridate::duration(y_eend_from, units="years"),
-    ttl < lubridate::duration(y_eend_to, unit = "years")
-  ) |> 
-  left_join(hrp_current, by = "kthid") |> 
-  select(kthid, eend, duration, ttl, unit_abbr, lastname, firstname)
+  # and not permanent employment (ends 2999-12-31)
+  hrp_current |>
+    mutate(
+      duration = emp_end - emp_beg,
+      ttl = emp_end - Sys.Date()
+    ) |>
+    filter(
+      emp_end != '2999-12-31',
+      ttl > lubridate::duration(y_eend_from, units="years"),
+    ) |>
+    select(kthid, emp_beg, emp_end, duration, ttl, unit_abbr, emp_desc, lastname, firstname)
 }
 
 check_hr_elm <- function(offset = 60) {
@@ -279,22 +283,21 @@ check_hr_elm <- function(offset = 60) {
 }
 
 check_hr_endsbeforebeg <- function() {
-  # people that end their employment even before beginning it
-  hrpe |> 
+  # people that end their employment even before beginning it or in the same day
+  hrpe |>
     filter(emp_end <= emp_beg) |> 
-  select(kthid, emp_end, emp_beg, unit_abbr, lastname, firstname) |> 
-  mutate(duration = emp_beg - emp_end) |> 
-  arrange(desc(duration))
+    select(kthid, emp_beg, emp_end, unit_abbr, lastname, firstname, emp_desc) |> 
+    mutate(duration = emp_end - emp_beg) |> 
+    arrange(duration)
 }
 
 check_missing_kthid <- function() {
   # people that have no kthid given
   hrpe |> 
     filter(is.na(kthid)) |> 
-  select(kthid, username, firstname, lastname, emp_end, emp_beg, unit_abbr) |> 
-  arrange(-desc(lastname))
+    select(kthid, username, firstname, lastname, emp_end, emp_beg, unit_abbr, emp_desc) |> 
+    arrange(-desc(lastname))
 }
-
 
 check_hr_topics <- function() {
   # People with non existing SCB topic codes
@@ -362,10 +365,10 @@ bs4_card(my_dt1, "Age deviants")
 
 ## Long employments
 
-Some employees have an employment end date set 6 years into the future (PhD student?), others have a employment end date set far into the future (life long employments?). Then there are a few outliers which have employments longer than 6 years but still set far in the future.
+Some employees have an employment end date set more than 6 years into the future.
 
 :::{.callout-note}
-Note that many of these employemnts end in 2029, which is just slightly over 6 years. So might be in order, if these are PhD students?
+Some of these employemnts may end in `r as.integer(Sys.Date() |> substr(1,4))+6`, just slightly over 6 years. That might be in order if these are PhD students?
 :::
 
 ```{r}
@@ -405,10 +408,10 @@ bs4_card(my_dt2, "Long employments")
 
 ## Ended employment before even starting it
 
-Some employees have a date indicating employment was ended before the start date.
+Some employees have a date indicating employment was ended before or at the start date.
 
 :::{.callout-note}
-Note that these entries may be legit, but could also indicate a data quality issue.
+Some of these entries may be legit, but could also indicate a data quality issue.
 :::
 
 ```{r}
@@ -448,7 +451,7 @@ bs4_card(my_dt3, "Last modified in the future (or before employment started)")
 
 ## Deviant SCB topics
 
-Some employees have been tagged with SCB research area codes which seem deviant.
+Some employees have been tagged with a non-existent SCB research area code
 
 :::{.callout-note}
 Note that some of these entries may be legit, but could also indicate a data quality issue.
