@@ -197,6 +197,7 @@ div.col_wrap div.bslib-column-wrap {
 #hrp <- hr_plus()
 
 hrp <- fetch_hr24()
+hrpo <- hrp
 
 hrp_extra <- function(hrp) {
     hrp |>
@@ -311,6 +312,32 @@ check_hr_fullname <- function() {
   re <- "\\s{2,}|[[:cntrl:]]|.*?\\s+$"
   hrpe |> filter(grepl(re, lastname) | grepl(re, firstname)) |> 
     select(kthid, unit_abbr, firstname, lastname)
+}
+
+check_control_characters <- function() {
+
+  re <- "\\s{2,}|[[:cntrl:]]|.*?\\s+$"
+
+  highlight <- function(x) 
+    paste0("<pre style='color: red'>\u26A0\u26A0\u26A0", "#", x, "#</pre>")
+
+  get_unicode_name <- function(char) {
+    code_point <- as.hexmode(utf8ToInt(char))
+    sprintf("U+%04X", code_point)
+  }
+
+  visible <- function(x) {
+    #x |> #stringi::stri_escape_unicode() |> 
+    #stringi::stri_trans_general(id = "any-name") 
+    x |> stringr::str_replace_all(
+      pattern = "[[:cntrl:]]", 
+      replacement = function(match) paste0("[", get_unicode_name(match), "]")
+    )    
+  }
+
+  hrpo |> filter(if_any(where(is.character), \(x) grepl(re, x)))  |> 
+    mutate(across(where(is.character), \(x) ifelse(grepl(re, x), highlight(visible(x)), x))) 
+
 }
 
 ```
@@ -490,9 +517,9 @@ bs4_card(my_dt4, "Deviant SCB research area topic codes")
 
 ```
 
-## Control characters in names
+## Control characters
 
-Some employee have names (firstnames and lastnames) which contain control characters (such as double spaces or tabs).
+Some employee have names (firstnames and lastnames) which contain control characters (such as double spaces or tabs). Such control characters can also exist in other fields, such as double or more spaces inside unit names.
 
 :::{.callout-note}
 Due to the nature of some of these control characters, they may not be easy to spot in the table. Double or triple (or more) spaces, tabs and so on are caught in this test.
@@ -505,7 +532,7 @@ Due to the nature of some of these control characters, they may not be easy to s
 #| column: screen-inset-shaded
 
 my_dt5 <- 
-  check_hr_fullname() |> 
+  check_control_characters() |> 
   datatable(
     style = "bootstrap4", # "bootstrap" or "bootstrap4" or "auto" (for bslib)
     class = "table-bordered table-condensed table-sm",
