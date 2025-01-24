@@ -314,6 +314,17 @@ check_hr_fullname <- function() {
     select(kthid, unit_abbr, firstname, lastname)
 }
 
+check_hr_unit_status <- function() {
+  hrpe |>
+    filter(!is.na(unit_abbr)) |> 
+    group_by(unit_abbr, unit_name) |> 
+    mutate(n = n_distinct(unit_status)) |> 
+    ungroup() |> 
+    filter(n > 1) |> 
+    count(school_name, unit_abbr, unit_name, unit_status) |> 
+    arrange(unit_abbr, unit_status)
+}
+
 check_control_characters <- function() {
 
   re <- "\\s{2,}|[[:cntrl:]]|.*?\\s+$"
@@ -600,6 +611,50 @@ my_dt6 <-
 # r - processing display element
 
 bs4_card(my_dt6, "Missing kthid")
+
+```
+
+## Inconsistent unit status
+
+Some units have (A)ctive on some rows and (I)nactive on other rows. That is an error, since it is
+a unit status, not a person status.
+
+:::{.callout-note}
+This is likely a data quality issue
+:::
+
+```{r}
+#| label: fig-unit-status
+#| fig-cap: Units with inconsistent status
+#| message: false
+#| column: screen-inset-shaded
+
+my_dt7 <- 
+  check_hr_unit_status() |> 
+  datatable(
+    style = "bootstrap4", # "bootstrap" or "bootstrap4" or "auto" (for bslib)
+    class = "table-bordered table-condensed table-sm",
+    rownames = FALSE,
+    height = "100%",
+    escape = FALSE,
+    extensions = "RowGroup",
+    options = list(
+#      rowGroup = list(dataSrc = 0),  # if rownames are used, increase index!
+      paging = FALSE,
+      dom = "iftr"  # display number of records at top
+    ),
+    selection = "none"
+  )
+
+# Available "dom" settings:
+# l - length changing input control
+# f - filtering input
+# t - The table!
+# i - Table information summary
+# p - pagination control
+# r - processing display element
+
+bs4_card(my_dt7, "Inconsistent unit status")
 
 ```
 
