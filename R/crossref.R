@@ -245,6 +245,61 @@ parse_cr_assertion <- function(assertion, doi) {
     add_column(doi = doi, .before = 1)
 }
 
+#' Crossref Works given an ISBN
+#'
+#' Crossref Works API provides information given an ISBN
+#' and here we return the title, DOIs and related ISBNs.
+#' @param isbn character the ISBN to look up information for
+#' @return  data frame with information
+#' @details For more information, see \url{# https://api.crossref.org/swagger-ui/index.html#/Works/get_works}
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  cr_isbn_lookup("9783030755379")
+#'  }
+#' }
+#' @export
+#' @importFrom libbib normalize_isbn is_valid_isbn_10 is_valid_isbn_13
+#' @importFrom httr2 request req_user_agent req_perform resp_body_json
+#' @importFrom utils URLencode
+cr_isbn_lookup <- function(isbn) {
+
+  i <- libbib::normalize_isbn(isbn)
+
+  is_valid <- 
+    libbib::is_valid_isbn_10(i) || 
+    libbib::is_valid_isbn_13(i)
+
+  stopifnot(is_valid)
+
+   ua <- "httr (https://github.com/KTH-Library/kthcorpus/; mailto:biblioteket@kth.se)"
+  
+  resp <- 
+    "https://api.crossref.org/works?filter=isbn:%s&select=title,DOI,ISBN&rows=1000" |> 
+    sprintf(utils::URLencode(i)) |> 
+    httr2::request() |> 
+    httr2::req_user_agent(string = ua) |> 
+    httr2::req_perform() |> 
+    httr2::resp_body_json()
+
+  has_more <- resp$message$`total-results` > resp$message$`items-per-page`
+
+  if (has_more)
+    warning("There are more results, paging is required, returning first page only...")
+  
+  resp |> parse_worklist()
+}
+
+#' @import dplyr tidyr tibble purrr
+parse_worklist <- function(x) {
+
+  res <- 
+    x$message$items |> map_dfr(function(x) 
+      x |> as_tibble() |> unnest(cols = any_of(c("title", "ISBN"))))   
+  res
+
+}
+
 #' @importFrom httr GET content
 cr_work_GET <- function(doi) {
   sprintf("https://api.crossref.org/works/%s",
@@ -289,3 +344,4 @@ parse_cr_confinfo <- function(event) {
     unnest_wider("sponsor", names_sep = "_") |>
     rename_with(.fn = function(x) gsub("_date-parts_1", "_date", x))
 }
+

@@ -46,7 +46,7 @@ NULL
 
 #' @title Employment Titles from Statistics Sweden
 #' @description Employment Titles have codes and descriptions
-#' @format A data frame with 7626 rows and 4 variables:
+#' @format A data frame with 8234 rows and 4 variables:
 #' \describe{
 #'   \item{\code{id}}{character code for employment title}
 #'   \item{\code{desc_swe}}{character description in Swedish}
