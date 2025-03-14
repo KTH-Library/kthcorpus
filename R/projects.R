@@ -257,7 +257,7 @@ projects_upload <- function() {
 
   #TODO: Investigate https://github.com/rstudio/renv/commit/da7bffd747b05384a99e0d4be0bf372d0b6364a1
   #kth_cordis <- kth_cordis() #
-  kth_formas <- kth_formas() # 21 s, ca 471 projects
+  kth_formas <- kth_formas() # 471 project, ca 13 s
   kth_vinnova <- kth_vinnova() # 441 projects, ca 4 minutes
 
   sc <- kth_swecris() # < 10 s
