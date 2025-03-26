@@ -705,6 +705,7 @@ Journal\tErratum\tarticleErratum
 Journal\tShort Survey\tarticle
 Conference Proceeding\tBook Chapter\tconferencePaperPublished
 Book Series\tNote\tchapter
+Conference Proceeding\tConference Review\tconferencePaperPublished
 " |> readr::read_tsv(show_col_types = FALSE)
 
   return (combos)
