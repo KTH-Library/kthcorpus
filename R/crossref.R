@@ -345,3 +345,53 @@ parse_cr_confinfo <- function(event) {
     rename_with(.fn = function(x) gsub("_date-parts_1", "_date", x))
 }
 
+
+#' Crossref information about name parts, given DOI(s)
+#'
+#' Crossref Works API provides information about name parts
+#' for some DOIs.
+#' @param doi character vector w DOI(s) to look up information for
+#' @return  data frame with name parts info
+#' @details For more information, see \url{#https://api.crossref.org/swagger-ui/index.html#/Works/get_works__doi_}
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  cr_name_parts("10.1021/cr900356p")
+#'  }
+#' }
+#' @export 
+#' @importFrom httr2 request req_perform resp_body_json
+#' @importFrom tibble enframe
+#' @importFrom dplyr select mutate rename
+#' @importFrom purrr possibly map_dfr 
+#' @importFrom tidyr unnest_wider
+cr_name_parts <- function(doi) {
+  name <- family <- NULL
+
+  np <- function(doi) {
+    sprintf("https://api.crossref.org/works/%s", doi) |> 
+      httr2::request() |> 
+      httr2::req_perform() |> 
+      httr2::resp_body_json() |> 
+      getElement("message") |> getElement("author") |> 
+      tibble::enframe() |> 
+      tidyr::unnest_wider(value) |> 
+      dplyr::select(any_of(c("name", "given", "family"))) |> 
+      dplyr::rename(rowid = "name") |> 
+      dplyr::mutate(rowid = as.integer(rowid)) |> 
+      dplyr::mutate(doi = doi) |> 
+      dplyr::mutate(author_raw_name = paste(given, family)) |>
+      dplyr::select(any_of(c("doi", "rowid")), everything())
+  }  
+
+  maybe_name_parts <- purrr::possibly(np, quiet = FALSE)
+
+  res <- unique(doi) |> purrr::map_dfr(maybe_name_parts, .progress = TRUE)
+
+#  if (length(res) == 1 & is.list(res))
+#    return(res[[1]])
+  
+  return (res)
+
+}
+

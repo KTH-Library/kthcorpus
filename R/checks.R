@@ -842,7 +842,7 @@ check_invalid_scopusid <- function(pubs = kth_diva_pubs()) {
 
   Year <- NULL
   # from kth-library/bibliutils: r'2-s2\.0-\d{10,11}'
-  re <- "^2-s2\\.0-\\d{10,11}$"
+  re <- "^2-s2\\.0-\\d{10,12}$"
 
   ScopusId <- NULL
 
