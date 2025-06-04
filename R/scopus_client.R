@@ -179,13 +179,13 @@ scopus_search_doi <- function(doi) {
 #'
 #' @param beg_loaddate date expressed as "yyyymmdd", by default current date minus 7 days
 #' @param end_loaddate date expressed as "yyyymmdd", by default current date
-#' @param include_early_access logical, by default FALSE
+#' @param include_early_access logical, by default TRUE
 #' @param beg_pubyear optional parameter to restrict criteria to include records after
 #'   a specific publication year
 #' @importFrom glue glue
 #' @export
 scopus_search_pubs_kth <- function(beg_loaddate, end_loaddate,
-  include_early_access = FALSE, beg_pubyear) {
+  include_early_access = TRUE, beg_pubyear) {
 
   if (missing(end_loaddate))
     end_loaddate <- Sys.Date() %>% format_date()

@@ -7,7 +7,7 @@
 scopus_search_pubs_kth(
   beg_loaddate,
   end_loaddate,
-  include_early_access = FALSE,
+  include_early_access = TRUE,
   beg_pubyear
 )
 }
@@ -16,7 +16,7 @@ scopus_search_pubs_kth(
 
 \item{end_loaddate}{date expressed as "yyyymmdd", by default current date}
 
-\item{include_early_access}{logical, by default FALSE}
+\item{include_early_access}{logical, by default TRUE}
 
 \item{beg_pubyear}{optional parameter to restrict criteria to include records after
 a specific publication year}
