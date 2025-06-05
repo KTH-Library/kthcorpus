@@ -3,7 +3,7 @@
 #' @param bucket The bucket to look in for the file, default hr24
 #' @param filedate an optional date to look for, default Sys.Date
 #' @import stringr lubridate aws.s3 dplyr
-#' @importFrom readr read_delim
+#' @importFrom readr read_delim problems
 #' @export
 fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
@@ -26,8 +26,13 @@ fetch_hr24 <- function(bucket = 'hr24', filedate = Sys.Date()) {
 
   message("Reading ", filename, " from ", bucket)
 
-  hr <- s3read_using(read_delim, delim = ";", show_col_types = FALSE, object = filename, bucket = bucket)
+  hr <- s3read_using(read_delim, delim = ";", show_col_types = FALSE, object = filename, bucket = bucket) |> suppressWarnings()
 
+  if (!is.null(problems(hr)) && nrow(problems(hr)) >= 1) {
+    warning("Parsing issue discovered, proceeding nonetheless, but please report the issue to HR.")
+    print(problems(hr))
+  }
+  
   cols <- data.frame(
     oldname = c("KTHID", "F\u00d6DELSE\u00c5R", "ORG_NR", "ORG_NAMN", "STATUS", "EFTERNAMN", "F\u00d6RNAMN", "KTH_EMAIL", "MAN/KVINNA",
                 "TJ_BEN_KOD", "TJ_BEN_TEXT", "BEF_NR", "BEF_FROM", "DATUM_NUV_BEF", "BEF_TOM", "SYSS_GRAD",
