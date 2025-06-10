@@ -544,10 +544,12 @@ pluck_raw_org <- function(x) {
     pull(1) |> na.omit() |> paste(collapse = ", ")
 
   ce_source <- ce_source |> 
-    gsub(
-      pattern="organization=(.*?)addressline=(.*?)city=(.*?)postcode=(.*?)country=(.*?)", 
-      replacement="\\1\\2\\3\\4\\5"
-    )
+    gsub(perl = TRUE,
+      pattern = "\\b(organization|addressline|city|postcode|country)=",
+      replacement = ""
+#      pattern="organization=(.*?)addressline=(.*?)city=(.*?)postcode=(.*?)country=(.*?)", 
+#      replacement="\\1\\2\\3\\4\\5"
+)
 
   ce_text <-
     x |> rget("ce:text", parents = "affiliation", new_name = "ce_text") |>
@@ -565,7 +567,7 @@ pluck_raw_org <- function(x) {
     mutate(across(where(is.character), .fns = function(x) na_if(x, ""))) |>
     mutate(raw = ifelse(nzchar(ce_source) && nchar(ce_source) > nchar(raw), NA_character_, raw)) |>
 #    mutate(ce_source = ifelse(nzchar(raw) && nchar(raw) < nchar(ce_source), NA, ce_source)) |>
-    mutate(raw_org = clean_raw_org(paste0(collapse = ", ", na.omit(c(org, ce_source, raw, ap, ce_text))))) |>
+    mutate(raw_org = clean_raw_org(paste0(collapse = ", ", unique(na.omit(c(org, unlist(strsplit(ce_source, ", ")), raw, ap, ce_text)))))) |>    
     mutate(across(where(is.character), .fns = function(x) na_if(x, "")))
 }
 

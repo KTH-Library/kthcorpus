@@ -59,3 +59,33 @@ test_that("scopus abstract extended info works for specific eid", {
 })
 
 
+test_that("scopus abstract extended extraction of affiliations does not contain duplicates for specific eid", {
+  
+  skip_on_ci()
+  
+  my_eid <- "2-s2.0-85180686613"
+
+  mods_from_eid <- function(eid) {
+    scopus_mods_params(
+      scopus = scopus_search_id(eid),
+      sid = gsub("2-s2.0-", "", eid)
+    ) |>
+    create_diva_mods()
+  }
+
+  my_string <- mods_from_eid(my_eid)
+
+  my_xml <- xml2::as_xml_document(my_string)
+  
+  xml2::xml_ns_strip(my_xml) 
+  
+  is_invalid <- 
+    any(
+      my_xml |> 
+      xml2::xml_find_all("//affiliation") |>
+      as.character() |> 
+      stringr::str_count("Viale") > 1
+    )
+  
+  expect_true(!is_invalid)
+})
