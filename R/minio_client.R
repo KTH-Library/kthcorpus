@@ -10,7 +10,7 @@ uses_https <- function() {
 #' @importFrom dplyr arrange
 #' @export
 minio_ls <- function(bucket = "bibliometrics") {
-  get_bucket_df(bucket, use_https = uses_https()) %>%
+  get_bucket_df(bucket, use_https = uses_https(), max = Inf) %>%
     arrange(desc(LastModified))
 
 }
