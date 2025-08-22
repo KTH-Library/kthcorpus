@@ -1549,14 +1549,13 @@ check_cora_orgs_unmapped <- function() {
   # mapping it to the KTH organizational structure through internal "short codes" for KTH orgs
   # as used in internal HR and Agresso systems
 
-  orgid <- unit_sv <- p_unit_sv <- org_code <- closed_date <- p_orgid <- NULL
+  orgid <- unit_sv <- p_unit_sv <- org_code <- closed_date <- p_orgid <- p_closed_date <- NULL
 
   orgs <- diva_organisations_cora()
   
-  orgs |> left_join(orgs |> 
-    select(orgid, unit_sv)  |> 
-    rename(p_unit_sv = "unit_sv"), by = c(p_orgid = "orgid"))  |> 
-    select(any_of(c("p_orgid", "p_unit_sv", "orgid", "org_type", "unit_sv", "org_code", "closed_date"))) |> 
+  orgs |> left_join(by = c(p_orgid = "orgid"), 
+    orgs |> select(orgid, unit_sv, closed_date) |> rename(p_unit_sv = "unit_sv", p_closed_date = "closed_date"))  |> 
+    select(any_of(c("p_orgid", "p_unit_sv", "p_closed_date", "orgid", "org_type", "unit_sv", "org_code", "closed_date"))) |> 
     filter(!grepl("centr|bibliotek", tolower(p_unit_sv))) |> 
     filter(is.na(org_code), is.na(closed_date), !grepl("centr|bibliotek", tolower(unit_sv))) |> 
     select(-any_of(c("closed_date"))) |> 
