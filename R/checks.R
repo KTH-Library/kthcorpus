@@ -1543,3 +1543,23 @@ check_non_qc_stale <- function(pubs = kth_diva_pubs()) {
     arrange(desc(y))
 }
 
+check_cora_orgs_unmapped <- function() {
+
+  # organisations in DiVA which appear to require a valid org_code shortcode for the unit
+  # mapping it to the KTH organizational structure through internal "short codes" for KTH orgs
+  # as used in internal HR and Agresso systems
+
+  orgid <- unit_sv <- p_unit_sv <- org_code <- closed_date <- p_orgid <- NULL
+
+  orgs <- diva_organisations_cora()
+  
+  orgs |> left_join(orgs |> 
+    select(orgid, unit_sv)  |> 
+    rename(p_unit_sv = "unit_sv"), by = c(p_orgid = "orgid"))  |> 
+    select(any_of(c("p_orgid", "p_unit_sv", "orgid", "org_type", "unit_sv", "org_code", "closed_date"))) |> 
+    filter(!grepl("centr|bibliotek", tolower(p_unit_sv))) |> 
+    filter(is.na(org_code), is.na(closed_date), !grepl("centr|bibliotek", tolower(unit_sv))) |> 
+    select(-any_of(c("closed_date"))) |> 
+    arrange(desc(p_orgid))
+}
+
