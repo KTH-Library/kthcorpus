@@ -208,7 +208,7 @@ cora_fixup_organisations <- function(data) {
     closedDate <- closed_date <- internalNote <- l_orgid <- name_1 <- name_2 <-
     org_code <- org_type <- organisationCode <- organisationType <-
     orgid <- p_orgid <- tsCreated <- tsUpdated <- ts_created <- ts_updated <-
-    unit_en <- unit_sv <- NULL
+    unit_en <- unit_sv <- org_code <- NULL
 
   data |>
     tidyr::separate("name", c("name_1", "name_2"), sep = "[|]", fill = "right") |>
@@ -237,7 +237,7 @@ cora_fixup_organisations <- function(data) {
     mutate(p_orgid = as.integer(sapply(strsplit(l_orgid, ","), "[[", 1))) |>
     select(
       orgid, org_type, p_orgid, org_code, l_orgid,
-      unit_sv, unit_en,
+      unit_sv, unit_en, org_code,
       closed_date, ts_created, ts_updated
     )
 }
