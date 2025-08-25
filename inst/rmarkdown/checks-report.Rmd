@@ -343,6 +343,13 @@ myDT(checks$non_qc_stale)
 ```
 
 
+### Saknade KTH-"org_code"-värden `r stats("missing_org_codes")`
+
+```{r}
+myDT(checks$missing_org_codes)
+```
+
+
 Externt {data-icon="fa-university" data-width=1200}
 =============================
 
@@ -504,6 +511,10 @@ KuraTHor fångar upp författare med namn som inleds med två eller flera skilje
 *Felaktig användning av ISBN*
 
 KuraTHor fångar upp poster av publikationstypen bokkapitel, konferensbidrag eller artikel som har ett ISBN inlagt i fältet för ISBN. Dessa publikationstyper ska inte ha något värde i fältet för ISBN. Istället ska i anmärkningsfältet anges ISBN på den publikation (bok, konferenshandling) som postens publikation är en del av.
+
+*Saknade orgkoder*
+
+KuraTHor kontrollerar DiVA-organisationer för KTH som verkar sakna "org_code", en nyckel för KTHs internal organisationsenhet som används i andra KTH-system (Agresso/HR) och mappar DiVAs organisationer till KTHs.
 
 __Externkontrollerat__
 

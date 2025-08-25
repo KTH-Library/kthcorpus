@@ -140,7 +140,7 @@ library(purrr)
 keys <-
   scopus$publications |>
   group_by(`prism:aggregationType`, subtypeDescription) |>
-  count() |> arrange(desc(n)) |>
+  count() |> arrange(desc(n)) |> 
   purrr::pmap_chr(.f =  function(`prism:aggregationType`, subtypeDescription, ...)
     kthcorpus:::frag_genre2(`prism:aggregationType`, subtypeDescription) |> names())
 
