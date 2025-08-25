@@ -819,3 +819,71 @@ my_mods[-c(my_problematic_eids)] |>
 
 system("firefox /tmp/aw_june_10.xml")
 
+###############
+
+# Scopus files from Gaël provided by Anders W on June 5, 2025
+
+library(tidyverse)
+
+eids <- 
+"data-raw/utsökning_missing_scopus_2025.txt" |> read_lines() |> 
+  gsub(pattern = ".*?(2-s2.0-\\d{1,}).*$", replacement = "\\1")
+
+ko <- kthid_orcid()
+
+# Now, we proceed to make a MODS collection for that set of scopus identifiers
+
+# we use a helper function to generate params and create the MODs
+mods_from_eid <- function(eid) {
+  scopus_mods_params(
+    scopus = scopus_search_id(eid),
+    sid = gsub("2-s2.0-", "", eid),
+    kthid_orcid_lookup = ko
+  ) |>
+  create_diva_mods()
+}
+
+possibly_mods <-
+  purrr::possibly(\(x) mods_from_eid(x), otherwise = NULL)
+
+my_mods <- eids |> map(possibly_mods, .progress = TRUE)
+my_fails <- map(my_mods, is.null) |> as_vector() |> which()
+my_problematic_eids <- eids[my_fails]
+
+my_problematic_eids |> paste0(collapse = "\n") |> cat()
+
+my_coll <-
+  my_mods |> 
+  purrr::compact()
+
+my_coll |> 
+  create_diva_modscollection()
+
+# exclude one entry which complains about C++ exception: xmlParseEntityRef: no name
+
+# topic contains "Growth & remodeling"!
+my_coll[c(333)] |> create_diva_modscollection()
+my_coll[[c(333)]] |> writeLines("data-raw/2-s2.0-85184935455.xml")
+system("xmllint data-raw/2-s2.0-85184935455.xml")
+
+my_coll2 <- my_coll[-c(333)]
+
+# topic contains "M&A strategy"!
+my_coll2[[c(458)]] |> writeLines("data-raw/2-s2.0-85162999985.xml")
+system("xmllint data-raw/2-s2.0-85162999985.xml")
+
+my_coll3 <- my_coll2[-c(458)]
+
+
+my_coll_file <- 
+  my_coll3 |> 
+  create_diva_modscollection()
+
+write_file(my_coll_file, file = "/tmp/aw_june_5.xml")
+
+dir.create("/tmp/aw")
+
+my_coll3 |>
+  write_mods_chunked(, outdir = "/tmp/aw")
+
+system("firefox /tmp/aw_june_5.xml")
