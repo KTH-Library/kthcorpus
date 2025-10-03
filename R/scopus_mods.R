@@ -335,7 +335,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
     p$authkeywords |>
     gsub(pattern = " [|] ", replacement = ", ") |>
     strsplit(", ") |>
-    unlist()
+    unlist() 
 
   if (all(is.na(keywords))) keywords <- NULL
 
@@ -361,7 +361,7 @@ scopus_mods_params <- function(scopus, sid, kthid_orcid_lookup = kthid_orcid()) 
       )
   }
 
-  subjects <- c(frag_subject(topic = keywords), hsv_categories)
+  subjects <- c(frag_subject(topic = tidy_xml(keywords)), tidy_xml(hsv_categories))
 
   # TODO: how should this be used? Remove it for now.
   location <- NULL #frag_location(p$`prism:url`)
