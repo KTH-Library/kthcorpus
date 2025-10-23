@@ -27,6 +27,8 @@ params:
 # if use_minio is true, the date params will NOT be used
 # set use_minio to false if using date params below...
 # for example: begdate: "2023-10-26" and enddate: "2023-10-26"
+#  begdate: "2025-09-25"
+#  enddate: "2025-09-26"
   begdate: !expr (Sys.Date() - 7)
   enddate: !expr Sys.Date()
 ---
@@ -75,6 +77,12 @@ fancy_table <- function(data, compact = FALSE) {
 } 
 
 library(kthcorpus)
+
+# params <- list(
+#   use_minio = TRUE,
+#   begdate = Sys.Date() - 9,
+#   enddate = Sys.Date()
+# )
 
 if (params$use_minio == "true" || params$use_minio == TRUE) {
   scopus <- scopus_from_minio()
@@ -137,13 +145,20 @@ library(kthcorpus)
 library(dplyr)
 library(purrr)
 
-keys <-
+pubtypes <-
   scopus$publications |>
   group_by(`prism:aggregationType`, subtypeDescription) |>
-  count() |> arrange(desc(n)) |> 
-  purrr::pmap_chr(.f =  function(`prism:aggregationType`, subtypeDescription, ...)
-    kthcorpus:::frag_genre2(`prism:aggregationType`, subtypeDescription) |> names())
+  count() |> arrange(desc(n))
 
+genres <- 
+  kthcorpus:::genre_scopus_diva() |> 
+  rename(subtypeDescription = subtype)
+
+keys <- 
+  pubtypes |> left_join(genres, by = c("subtypeDescription", "prism:aggregationType")) |> 
+  mutate(key = if_else(is.na(key), "other", key)) |> 
+  left_join(tibble(key = kthcorpus:::kth_genre() |> map(names) |> getElement("publicationType")), by = "key") |> 
+  pull(key)
 
 scopus$publications |>
   group_by(`prism:aggregationType`, subtypeDescription) |>
