@@ -296,8 +296,8 @@ import <-
 sids_erratum <-
   import |>
   filter(
-    grepl("erratum", subtypeDescription) |
-    grepl("erratum", `prism:aggregationType`)
+    grepl("[Ee]rratum", subtypeDescription) |
+    grepl("[Ee]rratum", `prism:aggregationType`)
   ) |>
   pull(`dc:identifier`)
 
