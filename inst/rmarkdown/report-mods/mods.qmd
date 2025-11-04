@@ -293,25 +293,26 @@ import <-
     !eid %in% already_imported$ScopusId
   )
 
+sids_erratum <-
+  import |>
+  filter(
+    grepl("[Ee]rratum", subtypeDescription) |
+    grepl("[Ee]rratum", `prism:aggregationType`)
+  ) |>
+  pull(`dc:identifier`)
+
 sids_cp <-
   import |>
   filter(
-#    `prism:aggregationType` == "Conference Proceeding",
+    !`dc:identifier` %in% c(sids_erratum) &
     `subtypeDescription` == "Conference Paper") |>
   pull(`dc:identifier`)
 
 sids_ar <-
   import |>
   filter(
-#    `prism:aggregationType` == "Conference Proceeding",
+    !`dc:identifier` %in% c(sids_erratum) &
     `subtypeDescription` == "Article") |>
-  pull(`dc:identifier`)
-
-sids_erratum <-
-  import |>
-  filter(
-#    `prism:aggregationType` == "Conference Proceeding",
-    `subtypeDescription` == "Erratum") |>
   pull(`dc:identifier`)
 
 sids_other <-
