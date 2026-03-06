@@ -227,5 +227,5 @@ issues_swepub <- function(institution = "kth", year_beg = 2012L,
       httr::accept("text/csv")
     )
   )
-  readr::read_csv(httr::content(res, as = "text", encoding = "UTF-8"), skip = 1)
+  readr::read_csv(I(httr::content(res, as = "text", encoding = "UTF-8")), skip = 1)
 }
