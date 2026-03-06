@@ -326,7 +326,7 @@ kth_case <- function() {
   # parse and remap colnames; use lowersnakecase field names
   # to fix R pkg warn: esc <- function(x) cat(stringi::stri_escape_unicode(x))
 
-  case_mapping <- readr::read_csv(show_col_types = FALSE, "colname,export
+  case_mapping <- readr::read_csv(show_col_types = FALSE, I("colname,export
     Project ID,display_project_id
     Name,name
     Funding Organisation,funding_org
@@ -356,7 +356,7 @@ kth_case <- function() {
     cost_center_school,responsible_school:cost_center_id
     cost_center_dep,department:cost_center_id
     cost_center_other,other_schools:cost_center_id
-    ")
+    "))
 
   dep <-
     mc_read("kthb/case/case_dept_match.csv") |>
