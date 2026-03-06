@@ -366,7 +366,8 @@ parse_cr_confinfo <- function(event) {
 #' @importFrom purrr possibly map_dfr 
 #' @importFrom tidyr unnest_wider
 cr_name_parts <- function(doi) {
-  name <- family <- NULL
+
+  name <- family <- value <- rowid <- given <- NULL
 
   np <- function(doi) {
     sprintf("https://api.crossref.org/works/%s", doi) |> 

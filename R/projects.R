@@ -9,7 +9,7 @@ kth_cordis <- function(use_refresh = FALSE) {
     )
   }
 
-  shortName <- projectID <- projectAcronym <- totalCost <- NULL
+  shortName <- projectID <- projectAcronym <- totalCost <- id <- NULL
 
   cordis::cordis_import(refresh = use_refresh)
 
@@ -229,7 +229,7 @@ kth_swecris <- function() {
 
 }
 
-#' @import OpenAIRE
+#' @importFrom OpenAIRE openaire api_params
 kth_openaire <- function(format = c("tsv", "xml")) {
 
   if (!requireNamespace("OpenAIRE", quietly = TRUE)) {
@@ -248,6 +248,25 @@ kth_openaire <- function(format = c("tsv", "xml")) {
     proj_country = "SE",
     proj_org = "Royal Institute of Technology"
   ))
+  tictoc::toc()
+  message("Done")
+  return(res)
+}
+
+#' @import OpenAIRE
+kth_openaire2 <- function() {
+
+  if (!requireNamespace("OpenAIRE", quietly = TRUE)) {
+    stop(
+      "Package \"OpenAIRE\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  # XML format takes longer (200x, 3+ minutes), but provides more details
+  message("Requesting projects from OpenAIRE")
+  tictoc::tic()
+  res <- OpenAIRE:::openaire_projects_participants_kth()
   tictoc::toc()
   message("Done")
   return(res)

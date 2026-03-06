@@ -4,7 +4,7 @@ on:
     paths:
       - '.github/workflows/scopus.yml'
   schedule:
-    - cron: '0 9 * * *' # UTC 49th min after 01th hour every day of month, month, day of week
+    - cron: '0 9 * * 1' # mondays every week at 09 am, see 
 
 name: Request publications from Scopus API and upload to S3/minio
 

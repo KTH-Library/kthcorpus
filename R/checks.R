@@ -1240,7 +1240,7 @@ checks_quarto_path <- function(report = "orcid_report.qmd") {
 }
 
 #' @importFrom quarto quarto_render
-checks_render_quarto <- function(report = checks_quarto_path(), use_tmp = TRUE) {
+checks_render_quarto <- function(report = checks_quarto_path(), use_tmp = TRUE, ...) {
 
   if (!requireNamespace("quarto", quietly = TRUE)) {
     stop(
@@ -1253,14 +1253,15 @@ checks_render_quarto <- function(report = checks_quarto_path(), use_tmp = TRUE) 
   message("Rendering ", basename(report), " to ", of)
 
   quarto::quarto_render(
-    input = report,
-    output_format = "html",
+    input = report, 
+    ...
+#    output_format = "html",
 #    execute_dir = "/tmp",
 #    output_file = of
   )
 
-  stopifnot(file.exists(of))
   out <- file.path(dirname(report), of)
+  stopifnot(file.exists(out))
 
   if (use_tmp == TRUE) {
     file.copy(out, "/tmp", overwrite = TRUE)

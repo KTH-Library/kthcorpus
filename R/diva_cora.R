@@ -162,7 +162,7 @@ cora_person <- function(identifier) {
 #' @importFrom rrapply rrapply
 flatten_cora_records <- function(coras) {
 
-  boho <- path <- value <- is_name <- is_value <- nme <- val <- p <- NULL
+  boho <- path <- value <- is_name <- is_value <- nme <- val <- p <- id <- NULL
 
   t0 <-
     rrapply::rrapply(coras,
@@ -208,7 +208,7 @@ cora_fixup_organisations <- function(data) {
     closedDate <- closed_date <- internalNote <- l_orgid <- name_1 <- name_2 <-
     org_code <- org_type <- organisationCode <- organisationType <-
     orgid <- p_orgid <- tsCreated <- tsUpdated <- ts_created <- ts_updated <-
-    unit_en <- unit_sv <- org_code <- NULL
+    unit_en <- unit_sv <- org_code <- id <- NULL
 
   data |>
     tidyr::separate("name", c("name_1", "name_2"), sep = "[|]", fill = "right") |>
@@ -255,7 +255,7 @@ diva_organisations_cora <- function(domain = "kth", freetext) {
 
   cos <-
     cora_organisation_search(
-      verbose = FALSE,
+      verbose = TRUE,
       domain = domain,
       freetext = freetext
     )

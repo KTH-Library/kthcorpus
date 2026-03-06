@@ -681,8 +681,8 @@ scopus_abstract_extended <- function(sid) {
     ag |> map_dfr(pluck_raw_org, .id = "id")
 #    ag |> map(pluck_org2) |> map_dfr(.f = function(x) tibble(raw_org = x), .id = "id")
 
-  value <- NULL
-
+  given <- id <- rowid <- value <- NULL
+  
   # fields_aut <-  strsplit(split = "\\s+",
   #   "preferred-name @seq ce:initials @_fa @type ce:surname @auid @orcid ce:indexed-name") |>
   #   unlist()

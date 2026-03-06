@@ -11,6 +11,10 @@ author:
         postal-code: 114 28
 highlight-style: pygments
 fig-cap-location: top
+css: 
+  - _extensions/kth-library/kth-quarto/kth-figtree.css
+theme: 
+  - custom.scss
 format:
   html:
     toc: true
