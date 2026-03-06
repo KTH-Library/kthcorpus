@@ -1,5 +1,10 @@
 # kthcorpus
 
+## kthcorpus 0.4.1
+
+* maintenance ...
+* some fixes to address R CMD CHECK NOTEs and warnings
+
 ## kthcorpus 0.4.0
 
 * add fcns for OAI-PMH harvesting from DiVA

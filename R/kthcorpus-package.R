@@ -152,3 +152,12 @@ NULL
 #'   \item{\code{Eng_comment}}{character Extra information in English if available}
 #'}
 "scb_topics"
+
+
+#' @noRd
+dummy <- function() {
+  rlang::env_bind
+  rlang::eval_tidy
+  rlang::parse_quo
+  rlang::current_env
+}

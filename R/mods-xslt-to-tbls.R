@@ -31,7 +31,7 @@ mods_json_to_object <- function(json) {
 
 parse_mods_object <- function(x) {
 
-  type <- aff <- NULL
+  type <- aff <- id <- NULL
 
   genre <- 
     x$genre |> as_tibble() |> 

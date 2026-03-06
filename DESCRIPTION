@@ -1,6 +1,6 @@
 Package: kthcorpus
 Title: Swedish Research Publications Data from KTH
-Version: 0.4.0
+Version: 0.4.1
 Authors@R: 
     person(given = "Markus",
            family = "Skyttner",
@@ -27,7 +27,7 @@ Remotes:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports: 
     purrr,
     curl,
@@ -76,4 +76,4 @@ Imports:
     xslt,
     oai
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)

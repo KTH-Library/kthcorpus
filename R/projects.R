@@ -9,7 +9,7 @@ kth_cordis <- function(use_refresh = FALSE) {
     )
   }
 
-  shortName <- projectID <- projectAcronym <- totalCost <- NULL
+  shortName <- projectID <- projectAcronym <- totalCost <- id <- NULL
 
   cordis::cordis_import(refresh = use_refresh)
 
@@ -229,7 +229,7 @@ kth_swecris <- function() {
 
 }
 
-#' @import OpenAIRE
+#' @importFrom OpenAIRE openaire api_params
 kth_openaire <- function(format = c("tsv", "xml")) {
 
   if (!requireNamespace("OpenAIRE", quietly = TRUE)) {
@@ -248,6 +248,25 @@ kth_openaire <- function(format = c("tsv", "xml")) {
     proj_country = "SE",
     proj_org = "Royal Institute of Technology"
   ))
+  tictoc::toc()
+  message("Done")
+  return(res)
+}
+
+#' @import OpenAIRE
+kth_openaire2 <- function() {
+
+  if (!requireNamespace("OpenAIRE", quietly = TRUE)) {
+    stop(
+      "Package \"OpenAIRE\" must be installed to use this function.",
+      call. = FALSE
+    )
+  }
+
+  # XML format takes longer (200x, 3+ minutes), but provides more details
+  message("Requesting projects from OpenAIRE")
+  tictoc::tic()
+  res <- OpenAIRE:::openaire_projects_participants_kth()
   tictoc::toc()
   message("Done")
   return(res)
@@ -307,7 +326,7 @@ kth_case <- function() {
   # parse and remap colnames; use lowersnakecase field names
   # to fix R pkg warn: esc <- function(x) cat(stringi::stri_escape_unicode(x))
 
-  case_mapping <- readr::read_csv(show_col_types = FALSE, "colname,export
+  case_mapping <- readr::read_csv(show_col_types = FALSE, I("colname,export
     Project ID,display_project_id
     Name,name
     Funding Organisation,funding_org
@@ -337,7 +356,7 @@ kth_case <- function() {
     cost_center_school,responsible_school:cost_center_id
     cost_center_dep,department:cost_center_id
     cost_center_other,other_schools:cost_center_id
-    ")
+    "))
 
   dep <-
     mc_read("kthb/case/case_dept_match.csv") |>

@@ -481,7 +481,7 @@ lu_diva_mods_xml <- function(params) {
 
 # xml fragments
 
-diva_publication_types <- readr::read_lines(trimws("
+diva_publication_types <- readr::read_lines(I(trimws("
 article
 review
 bookReview
@@ -500,7 +500,7 @@ conferenceProceedings
 report
 collection
 studentThesis
-other"))
+other")))
 
 frag_genre_orig <- function(publication_type) {
   if (!publication_type %in% diva_publication_types)
