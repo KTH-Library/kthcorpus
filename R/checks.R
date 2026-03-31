@@ -743,7 +743,7 @@ check_invalid_kthid <- function(authors = kth_diva_authors()) {
   # TODO: multiple same kthids in one publication?
   # username in orcid field?
 
-  re_kthid <- "^u1[a-z0-9]{6}$"
+  re_kthid <- "^(?:u1[a-z0-9]{6}|[aA][0-9]{10})$"
   re_temp <- "^PI\\d+|P\\d+|pi\\d+|p\\d+|Pi\\d+|PI \\d+|-"
 
   ScopusId <- NULL
