@@ -1301,7 +1301,7 @@ checks_upload_report <- function(path, dest = "kthb/kthcorpus") {
     warning("Please see if envvar MC_HOST_kthb has been set, or that ~/.mc/config.json exists")
 
   cmd <- sprintf("%s cp %s %s", util, path, dest)
-  res <- system(cmd, timeout = 15)
+  res <- system(cmd, timeout = 120)
 
   if (res == 124) stop("Time out when uploading file ", path)
   if (res != 0) stop("Error when using minio client to upload file, error code: ", res)
