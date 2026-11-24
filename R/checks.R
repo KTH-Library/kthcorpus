@@ -981,15 +981,16 @@ check_manuscripts_with_identifiers <- function(pubs = kth_diva_pubs()) {
   # DOIs are usually for published works, sometimes pre-prints provide DOIs though
 
   # Suppress false positives by excluding DOIs starting with
-  # 10.1101, 10.48550, 10.2139, 10.31219, 10.20944, 10.21203 (bioRxiv, arXiv, SSRN, OSF, Preprints.org, Research Square)
+  # 10.1101, 10.48550, 10.2139, 10.31219, 10.20944, 10.21203 (bioRxiv, arXiv, SSRN, OSF, Preprints.org, Research Square, ChemRxiv)
   # https://doi.org/10.1101/2020.08.24.252296
   # https://doi.org/10.48550/ARXIV.2202.11577
   # https://doi.org/10.2139/ssrn.4385563
   # https://doi.org/10.31219/osf.io/mgjwv
   # https://doi.org/10.20944/preprints202101.0605.v1
   # https://doi.org/10.21203/rs.3.rs-2379758/v1
+  # https://doi.org/10.26434/chemrxiv.15010334/v1
 
-  re_exclude <- "^10.1101|^10.48550|^10.2139|^10.31219|^10.20944|^10.21203" # see above
+  re_exclude <- "^10.1101|^10.48550|^10.2139|^10.31219|^10.20944|^10.21203|^10.26434" # see above
 
   ScopusId <- PMID <- Year <- LastUpdated <- NULL
 
